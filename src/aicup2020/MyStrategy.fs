@@ -9,14 +9,14 @@ type MyStrategy() =
     let mutable currRangeds = 0
     let mutable currUnits = 0
     let mutable myId = 0
+    let mutable maxUnits = 15
 
     let maxBuilders = 6
-    let maxUnits = 15
 
     member this.countUnits view entityType =
-        view.Entities |> Array.filter(fun x -> x.PlayerId = Some(view.MyId))
-                 |> Array.filter(fun x -> x.EntityType = entityType)
-                 |> Array.length
+        view.Entities |> Seq.filter(fun x -> x.PlayerId = Some(myId))
+                 |> Seq.filter(fun x -> x.EntityType = entityType)
+                 |> Seq.length
 
     member this.getAction(playerView: PlayerView, debugInterface: Option<DebugInterface>): Action =
         view <- Some(playerView)
@@ -27,9 +27,16 @@ type MyStrategy() =
         currRangeds <- this.countUnits playerView EntityType.RangedUnit
         currUnits <- currBuilders + currMelees + currRangeds
 
-        let actions = playerView.Entities |> Array.filter(fun x -> x.PlayerId = Some(myId))
-                                          |> Array.map this.entityTurn
-                                          |> Map.ofArray
+        maxUnits <- playerView.Entities |> Seq.filter(fun x -> x.PlayerId = Some(myId))
+                                        |> Seq.filter(fun x -> x.EntityType = EntityType.BuilderBase ||
+                                                                 x.EntityType = EntityType.MeleeBase ||
+                                                                 x.EntityType = EntityType.RangedBase)
+                                        |> Seq.map(fun x -> playerView.EntityProperties.[x.EntityType].PopulationProvide)
+                                        |> Seq.sum
+
+        let actions = playerView.Entities |> Seq.filter(fun x -> x.PlayerId = Some(myId))
+                                          |> Seq.map this.entityTurn
+                                          |> Map.ofSeq
         { EntityActions = actions}
 
     member this.debugUpdate(playerView: PlayerView, debugInterface: DebugInterface) =
@@ -41,65 +48,52 @@ type MyStrategy() =
         
         let props = (playerView.EntityProperties.TryFind entity.EntityType).Value
 
+        let globalAttackTarget = {
+            X = playerView.MapSize - 1
+            Y = playerView.MapSize - 1
+        }
+        let globalDefenceTarget = {
+            X = 17
+            Y = 17
+        }
+
         let moveAction = match entity.EntityType with
                             | EntityType.BuilderUnit -> Some({
-                                Target = {
-                                    X = playerView.MapSize - 1
-                                    Y = playerView.MapSize - 1
-                                }
+                                Target = globalAttackTarget
                                 FindClosestPosition = true
                                 BreakThrough = true         
                             })
                             | EntityType.RangedUnit
                             | EntityType.MeleeUnit -> match currUnits with 
                                                             | x when x >= maxUnits - 4 -> Some({
-                                                                Target = {
-                                                                    X = playerView.MapSize - 1
-                                                                    Y = playerView.MapSize - 1
-                                                                }
+                                                                Target = globalAttackTarget
                                                                 FindClosestPosition = true
                                                                 BreakThrough = true         
                                                             })
                                                             | _ -> Some({
-                                                                Target = {
-                                                                    X = 17
-                                                                    Y = 17
-                                                                }
+                                                                Target = globalDefenceTarget
                                                                 FindClosestPosition = true
                                                                 BreakThrough = false         
                                                             })
-                            | EntityType.RangedUnit
-                            | EntityType.MeleeUnit when currUnits = maxUnits -> Some({
-                                Target = {
-                                    X = playerView.MapSize - 1
-                                    Y = playerView.MapSize - 1
-                                }
-                                FindClosestPosition = true
-                                BreakThrough = true         
-                            })
                             | _ -> None
+
+        let getBuildPos entity = {
+            X = entity.Position.X + props.Size
+            Y = entity.Position.Y + props.Size - 1
+        }  
 
         let buildAction = match entity.EntityType with
                             | EntityType.BuilderBase when currBuilders < maxBuilders -> Some({
                                 EntityType = enum(LanguagePrimitives.EnumToValue entity.EntityType + 1)
-                                Position = {
-                                    X = entity.Position.X + props.Size
-                                    Y = entity.Position.Y + props.Size - 1
-                                }                                
+                                Position = getBuildPos entity                              
                             })
                             | EntityType.RangedBase -> Some({
                                 EntityType = enum(LanguagePrimitives.EnumToValue entity.EntityType + 1)
-                                Position = {
-                                    X = entity.Position.X + props.Size
-                                    Y = entity.Position.Y + props.Size - 1
-                                }                                
+                                Position = getBuildPos entity                         
                             })
-                            | EntityType.MeleeBase when playerView.Players.[myId].Resource >= 50 -> Some({
+                            | EntityType.MeleeBase when playerView.Players.[myId-1].Resource >= 60 -> Some({
                                 EntityType = enum(LanguagePrimitives.EnumToValue entity.EntityType + 1)
-                                Position = {
-                                    X = entity.Position.X + props.Size
-                                    Y = entity.Position.Y + props.Size - 1
-                                }                                
+                                Position = getBuildPos entity                  
                             })
                             | _ -> None
 
