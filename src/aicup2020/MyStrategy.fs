@@ -89,16 +89,16 @@ type MyStrategy() =
                             })
                             | EntityType.RangedUnit
                             | EntityType.MeleeUnit -> match currUnits with 
-                                                            | x when x >= maxUnits - 4 -> Some({
+                                                            | _ -> Some({
                                                                 Target = this.findAttackTarget entity
                                                                 FindClosestPosition = true
                                                                 BreakThrough = breakThrough         
                                                             })
-                                                            | _ -> Some({
-                                                                Target = globalDefenceTarget
-                                                                FindClosestPosition = true
-                                                                BreakThrough = breakThrough         
-                                                            })
+                                                            //| _ -> Some({
+                                                            //    Target = globalDefenceTarget
+                                                            //    FindClosestPosition = true
+                                                            //    BreakThrough = breakThrough         
+                                                            //})
                             | _ -> None
 
         let getBuildPos entity = {
