@@ -1,6 +1,8 @@
 namespace Aicup2020
 
 open Aicup2020.Model
+open Jaina.Algo
+open Jaina.Logic.Tactics
 
 type MyStrategy() =
     let mutable view:option<PlayerView> = None
@@ -10,6 +12,9 @@ type MyStrategy() =
     let mutable currUnits = 0
     let mutable myId = 0
     let mutable maxUnits = 15
+    let mutable attackHeatMap = Map.empty
+    let mutable globalAttackTarget = {X= 0; Y = 0;}
+    let mutable fieldSize = {X=0; Y=0;}
 
     let maxBuilders = 6
 
@@ -27,6 +32,16 @@ type MyStrategy() =
         currRangeds <- this.countUnits playerView EntityType.RangedUnit
         currUnits <- currBuilders + currMelees + currRangeds
 
+        globalAttackTarget <- {
+            X = playerView.MapSize - 1
+            Y = playerView.MapSize - 1
+        }
+
+        fieldSize <- {X = playerView.MapSize; Y = playerView.MapSize}
+
+        let tactic = new TargetNearestRangedBase()
+        attackHeatMap <- tactic.Run(playerView)
+
         maxUnits <- playerView.Entities |> Seq.filter(fun x -> x.PlayerId = Some(myId))
                                         |> Seq.filter(fun x -> x.EntityType = EntityType.BuilderBase ||
                                                                  x.EntityType = EntityType.MeleeBase ||
@@ -43,19 +58,28 @@ type MyStrategy() =
         debugInterface.send (DebugCommand.Clear(new DebugCommandClear()))
         debugInterface.getState () |> ignore
 
+    member this.findAttackTarget(entity: Entity) =
+        let myPos = attackHeatMap.TryFind(entity.Position)
+        match myPos with
+            | Some p -> 
+                    let (pos, _) = Pathfinder.neighboursOf fieldSize entity.Position 
+                                |> Seq.map(fun x -> (x, attackHeatMap.[x]))
+                                |> Seq.sortBy(fun x -> snd x)
+                                |> Seq.head
+                    pos
+            | _ -> globalAttackTarget
+
     member this.entityTurn(entity: Entity) =
         let playerView = view.Value
         
         let props = (playerView.EntityProperties.TryFind entity.EntityType).Value
 
-        let globalAttackTarget = {
-            X = playerView.MapSize - 1
-            Y = playerView.MapSize - 1
-        }
         let globalDefenceTarget = {
             X = 17
             Y = 17
         }
+
+        let breakThrough = entity.Position.X > 20 || entity.Position.Y > 20
 
         let moveAction = match entity.EntityType with
                             | EntityType.BuilderUnit -> Some({
@@ -66,14 +90,14 @@ type MyStrategy() =
                             | EntityType.RangedUnit
                             | EntityType.MeleeUnit -> match currUnits with 
                                                             | x when x >= maxUnits - 4 -> Some({
-                                                                Target = globalAttackTarget
+                                                                Target = this.findAttackTarget entity
                                                                 FindClosestPosition = true
-                                                                BreakThrough = true         
+                                                                BreakThrough = breakThrough         
                                                             })
                                                             | _ -> Some({
                                                                 Target = globalDefenceTarget
                                                                 FindClosestPosition = true
-                                                                BreakThrough = false         
+                                                                BreakThrough = breakThrough         
                                                             })
                             | _ -> None
 
