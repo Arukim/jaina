@@ -19,6 +19,7 @@ module Runner =
             writer.Flush()
 
         member this.run =
+            printfn $"I see {System.Environment.ProcessorCount} advisors" 
             let myStrategy = new MyStrategy()
             let debugInterface = new DebugInterface(reader, writer)
 
