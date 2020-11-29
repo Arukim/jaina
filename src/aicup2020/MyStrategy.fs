@@ -66,7 +66,10 @@ type MyStrategy() =
             | Some p -> 
                     let (pos, _) = Pathfinder.neighboursOf fieldSize entity.Position 
                                 |> Seq.map(fun x -> (x, attackHeatMap.[x]))
-                                |> Seq.sortBy(fun x -> snd x)
+                                // psedo-randomize movement. Instead of always following NNNWWW pattern
+                                // use something like NWNWWN. GetHasCode makes it stable for all units,
+                                // so they continue to keep together.
+                                |> Seq.sortBy(fun x -> snd x, (fst x).GetHashCode())
                                 |> Seq.head
                     pos
             | _ -> globalAttackTarget
