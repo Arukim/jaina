@@ -3,10 +3,9 @@
 open Aicup2020.Model
 open Jaina.Algo
 open Jaina.Core
-open System
 
-type TargetNearestRangedBase() =
-    member _.buildWalkMap (playerView: PlayerView) =
+type TargetNearestRangedBase(playerView: PlayerView) =
+    member _.buildWalkMap =
         let entities = playerView.Entities
         let matchSomeBuilding = fun x -> match x.EntityType with
                                             | EntityType.BuilderBase
@@ -38,7 +37,7 @@ type TargetNearestRangedBase() =
     member this.Run (playerView: PlayerView) =
         let field = {X = playerView.MapSize; Y = playerView.MapSize}
 
-        let walkMap = this.buildWalkMap playerView
+        let walkMap = this.buildWalkMap
 
         let enemySelector = fun x -> match x.EntityType with
                                      | EntityType.RangedBase -> Some((x.Position, 0u))

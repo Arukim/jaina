@@ -34,9 +34,12 @@
         <Compile Include="Model/DebugState.fs" />
         <Compile Include="Core\Config.fs" />
         <Compile Include="Core\PerfMeter.fs" />
+        <Compile Include="Core\Diag.fs" />
+        <Compile Include="Core\ViewHelper.fs" />
         <Compile Include="Collections\PriorityQ.fs" />
         <Compile Include="Algo\Pathfinder.fs" />
         <Compile Include="Logic\Tactics\TargetNearestRangedBase.fs" />
+        <Compile Include="Logic\BuilderManager.fs" />
         <Compile Include="DebugInterface.fs" />
         <Compile Include="MyStrategy.fs" />
         <Compile Include="Runner.fs" />

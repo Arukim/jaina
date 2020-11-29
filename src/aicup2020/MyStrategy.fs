@@ -2,6 +2,7 @@ namespace Aicup2020
 
 open Aicup2020.Model
 open Jaina.Algo
+open Jaina.Logic
 open Jaina.Logic.Tactics
 open Jaina.Core
 
@@ -14,35 +15,27 @@ type MyStrategy() =
     let mutable myId = 0
     let mutable maxUnits = 15
     let mutable attackHeatMap = Map.empty
-    let mutable globalAttackTarget = {X= 0; Y = 0;}
     let mutable fieldSize = {X=0; Y=0;}
-
-    let maxBuilders = 6
-
-    member this.countUnits view entityType =
-        view.Entities |> Seq.filter(fun x -> x.PlayerId = Some(myId))
-                 |> Seq.filter(fun x -> x.EntityType = entityType)
-                 |> Seq.length
+    let mutable builderManager = None
 
     member this.getAction(playerView: PlayerView, debugInterface: Option<DebugInterface>): Action =
         view <- Some(playerView)
         myId <- playerView.MyId
 
-        currBuilders <- this.countUnits playerView EntityType.BuilderUnit
-        currMelees <- this.countUnits playerView EntityType.MeleeUnit
-        currRangeds <- this.countUnits playerView EntityType.RangedUnit
+        currBuilders <- ViewHelper.countOwnUnits playerView EntityType.BuilderUnit
+        currMelees <- ViewHelper.countOwnUnits playerView EntityType.MeleeUnit
+        currRangeds <- ViewHelper.countOwnUnits playerView EntityType.RangedUnit
         currUnits <- currBuilders + currMelees + currRangeds
-
-        globalAttackTarget <- {
-            X = playerView.MapSize - 1
-            Y = playerView.MapSize - 1
-        }
 
         fieldSize <- {X = playerView.MapSize; Y = playerView.MapSize}
 
-        let tactic = new TargetNearestRangedBase()
-        if currMelees + currRangeds > 0 && playerView.CurrentTick % Config.Attack_Map_Refresh_Rate = 0 then
-            attackHeatMap <- tactic.Run(playerView)
+        if currMelees + currRangeds > 0 && playerView.CurrentTick % Config.Attack_Map_Refresh_Rate = 0 then            
+            let tactic = new TargetNearestRangedBase(playerView)
+            Diag.elapsedRelease "AHM Run" (fun () -> attackHeatMap <- tactic.Run(playerView))
+
+        builderManager <- Some(new BuilderManager(playerView))
+
+        builderManager.Value.Init()
 
         maxUnits <- playerView.Entities |> Seq.filter(fun x -> x.PlayerId = Some(myId))
                                         |> Seq.filter(fun x -> x.EntityType = EntityType.BuilderBase ||
@@ -72,26 +65,22 @@ type MyStrategy() =
                                 |> Seq.sortBy(fun x -> snd x, (fst x).GetHashCode())
                                 |> Seq.head
                     pos
-            | _ -> globalAttackTarget
+            | _ -> Config.Global_Attack_Target
+
+    member this.allocateBuilders =
+        
+        ignore
 
     member this.entityTurn(entity: Entity) =
         let playerView = view.Value
+        let builderManager = builderManager.Value
         
         let props = (playerView.EntityProperties.TryFind entity.EntityType).Value
-
-        let globalDefenceTarget = {
-            X = 17
-            Y = 17
-        }
 
         let breakThrough = entity.Position.X > 20 || entity.Position.Y > 20
 
         let moveAction = match entity.EntityType with
-                            | EntityType.BuilderUnit -> Some({
-                                Target = globalAttackTarget
-                                FindClosestPosition = true
-                                BreakThrough = true         
-                            })
+                            | EntityType.BuilderUnit -> builderManager.GetMove entity
                             | EntityType.RangedUnit
                             | EntityType.MeleeUnit -> match currUnits with 
                                                             | _ -> Some({
@@ -112,7 +101,7 @@ type MyStrategy() =
         }  
 
         let buildAction = match entity.EntityType with
-                            | EntityType.BuilderBase when currBuilders < maxBuilders -> Some({
+                            | EntityType.BuilderBase when currBuilders < Config.Max_Builders_Count -> Some({
                                 EntityType = enum(LanguagePrimitives.EnumToValue entity.EntityType + 1)
                                 Position = getBuildPos entity                              
                             })
@@ -126,20 +115,24 @@ type MyStrategy() =
                             })
                             | _ -> None
 
-        let attackAction = Some({
-            Target = None
-            AutoAttack = Some({
-                PathfindRange = props.SightRange
-                ValidTargets = match entity.EntityType with
-                                       | EntityType.BuilderUnit -> [|EntityType.Resource|]
-                                       | _ -> [||]
-            })
-        })
+        let attackAction = match entity.EntityType with
+                            | EntityType.BuilderUnit -> builderManager.GetAttack entity
+                            | _ -> Some({
+                                      Target = None
+                                      AutoAttack = Some({
+                                          PathfindRange = props.SightRange
+                                          ValidTargets = match entity.EntityType with
+                                                                 | EntityType.BuilderUnit -> [|EntityType.Resource|]
+                                                                 | _ -> [||]
+                                      })
+                                  })
+        
+      
 
         let move = {
             MoveAction = moveAction
             BuildAction = buildAction
             AttackAction = attackAction
-            RepairAction = None
+            RepairAction = builderManager.GetRepair entity
         }
         (entity.Id, move)
