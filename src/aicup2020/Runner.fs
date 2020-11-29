@@ -3,6 +3,7 @@ namespace Aicup2020
 open System
 open System.IO
 open System.Net.Sockets
+open Jaina.Core
 
 module Runner =
     type T(host, port, token: string) =
@@ -22,16 +23,19 @@ module Runner =
             printfn $"I see {System.Environment.ProcessorCount} advisors" 
             let myStrategy = new MyStrategy()
             let debugInterface = new DebugInterface(reader, writer)
+            let perfMeter = new PerfMeter("turn", 1)
 
             let rec loop () =
                 match Model.ServerMessage.readFrom reader with
                 | Model.ServerMessage.GetAction message ->
+                    perfMeter.Start()
                     (Model.ClientMessage.ActionMessage
                         { Action =
                               myStrategy.getAction
                                   (message.PlayerView, (if message.DebugAvailable then Some debugInterface else None)) }).writeTo
                         writer
                     writer.Flush()
+                    perfMeter.Stop()
                     loop ()
                 | Model.ServerMessage.Finish message -> ()
                 | Model.ServerMessage.DebugUpdate message ->
@@ -40,7 +44,10 @@ module Runner =
                     writer.Flush()
                     loop ()
 
-            loop ()
+            try
+                loop ()
+            finally
+                printfn $"{perfMeter.Summarize()}"
 
     [<EntryPoint>]
     let main argv =
