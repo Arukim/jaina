@@ -3,6 +3,7 @@ namespace Aicup2020
 open Aicup2020.Model
 open Jaina.Algo
 open Jaina.Logic.Tactics
+open Jaina.Core
 
 type MyStrategy() =
     let mutable view:option<PlayerView> = None
@@ -40,7 +41,7 @@ type MyStrategy() =
         fieldSize <- {X = playerView.MapSize; Y = playerView.MapSize}
 
         let tactic = new TargetNearestRangedBase()
-        if currMelees + currRangeds > 0 then
+        if currMelees + currRangeds > 0 && playerView.CurrentTick % Config.Attack_Map_Refresh_Rate = 0 then
             attackHeatMap <- tactic.Run(playerView)
 
         maxUnits <- playerView.Entities |> Seq.filter(fun x -> x.PlayerId = Some(myId))
