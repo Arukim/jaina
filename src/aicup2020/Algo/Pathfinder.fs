@@ -8,9 +8,9 @@ module Pathfinder =
     let neighboursOf field curr = 
         seq {
             if curr.X > 0 then yield {X = curr.X - 1; Y = curr.Y}
-            if curr.X < field.X then yield {X = curr.X + 1; Y = curr.Y}
+            if curr.X < field.X-1 then yield {X = curr.X + 1; Y = curr.Y}
             if curr.Y > 0 then yield {X = curr.X; Y = curr.Y - 1}
-            if curr.Y < field.Y then yield {X = curr.X; Y = curr.Y + 1}
+            if curr.Y < field.Y-1 then yield {X = curr.X; Y = curr.Y + 1}
         }
 
     let aStarField field starts calcWeight =

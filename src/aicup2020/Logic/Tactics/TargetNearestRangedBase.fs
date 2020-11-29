@@ -10,7 +10,9 @@ type TargetNearestRangedBase(playerView: PlayerView) =
         let matchSomeBuilding = fun x -> match x.EntityType with
                                             | EntityType.BuilderBase
                                             | EntityType.MeleeBase
+                                            | EntityType.Wall
                                             | EntityType.RangedBase
+                                            | EntityType.House
                                             | EntityType.Turret -> Some(x)
                                             | _ -> None
         
@@ -43,6 +45,7 @@ type TargetNearestRangedBase(playerView: PlayerView) =
                                      | EntityType.RangedBase -> Some((x.Position, 0u))
                                      | EntityType.BuilderBase -> Some((x.Position, 10u))
                                      | EntityType.MeleeBase -> Some((x.Position, 5u))
+                                     | EntityType.House -> Some((x.Position, 0u))
                                      | EntityType.Turret -> Some((x.Position, 250u))
                                      | _ -> None
 

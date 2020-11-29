@@ -14,14 +14,17 @@ module ViewHelper=
     let ownEntitiesOf view entityType =
         view.Entities |> Seq.filter(fun x -> x.PlayerId = Some(view.MyId))
                       |> Seq.filter(fun x -> x.EntityType = entityType)
+                      
+    let entitiesOf view entityType =
+        view.Entities |> Seq.filter(fun x -> x.EntityType = entityType)
 
     let filterBuildings entities =
-        entities |> Seq.filter(fun x -> match x.EntityType with
+        entities |> Seq.choose(fun x -> match x.EntityType with
                                                     | EntityType.BuilderBase
                                                     | EntityType.MeleeBase
                                                     | EntityType.RangedBase
                                                     | EntityType.Wall
                                                     | EntityType.Turret
-                                                    | EntityType.House -> true
-                                                    | _ -> false)
+                                                    | EntityType.House -> Some(x)
+                                                    | _ -> None)            
 

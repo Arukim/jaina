@@ -16,7 +16,9 @@ type MyStrategy() =
     let mutable maxUnits = 15
     let mutable attackHeatMap = Map.empty
     let mutable fieldSize = {X=0; Y=0;}
-    let mutable builderManager = None
+    let mutable foreman = None
+    let mutable architect = None
+    let mutable maxBuilders = Config.Max_Builders_Count
 
     member this.getAction(playerView: PlayerView, debugInterface: Option<DebugInterface>): Action =
         view <- Some(playerView)
@@ -26,6 +28,7 @@ type MyStrategy() =
         currMelees <- ViewHelper.countOwnUnits playerView EntityType.MeleeUnit
         currRangeds <- ViewHelper.countOwnUnits playerView EntityType.RangedUnit
         currUnits <- currBuilders + currMelees + currRangeds
+        maxBuilders <- Config.Max_Builders_Count + (ViewHelper.ownEntitiesOf playerView EntityType.House |> Seq.length)
 
         fieldSize <- {X = playerView.MapSize; Y = playerView.MapSize}
 
@@ -33,9 +36,11 @@ type MyStrategy() =
             let tactic = new TargetNearestRangedBase(playerView)
             Diag.elapsedRelease "AHM Run" (fun () -> attackHeatMap <- tactic.Run(playerView))
 
-        builderManager <- Some(new BuilderManager(playerView))
+        architect <- Some(new Architect(playerView))
+        architect.Value.Init()
 
-        builderManager.Value.Init()
+        foreman <- Some(new Foreman(playerView, architect.Value))
+        foreman.Value.Init()
 
         maxUnits <- playerView.Entities |> Seq.filter(fun x -> x.PlayerId = Some(myId))
                                         |> Seq.filter(fun x -> x.EntityType = EntityType.BuilderBase ||
@@ -73,14 +78,14 @@ type MyStrategy() =
 
     member this.entityTurn(entity: Entity) =
         let playerView = view.Value
-        let builderManager = builderManager.Value
+        let foreman = foreman.Value
         
         let props = (playerView.EntityProperties.TryFind entity.EntityType).Value
 
         let breakThrough = entity.Position.X > 20 || entity.Position.Y > 20
 
         let moveAction = match entity.EntityType with
-                            | EntityType.BuilderUnit -> builderManager.GetMove entity
+                            | EntityType.BuilderUnit -> foreman.GetMove entity
                             | EntityType.RangedUnit
                             | EntityType.MeleeUnit -> match currUnits with 
                                                             | _ -> Some({
@@ -101,7 +106,7 @@ type MyStrategy() =
         }  
 
         let buildAction = match entity.EntityType with
-                            | EntityType.BuilderBase when currBuilders < Config.Max_Builders_Count -> Some({
+                            | EntityType.BuilderBase when currBuilders < maxBuilders -> Some({
                                 EntityType = enum(LanguagePrimitives.EnumToValue entity.EntityType + 1)
                                 Position = getBuildPos entity                              
                             })
@@ -109,14 +114,15 @@ type MyStrategy() =
                                 EntityType = enum(LanguagePrimitives.EnumToValue entity.EntityType + 1)
                                 Position = getBuildPos entity                         
                             })
-                            | EntityType.MeleeBase when playerView.Players.[myId-1].Resource >= 60 -> Some({
+                            | EntityType.MeleeBase when playerView.Players.[myId-1].Resource >= Config.Build_Warrior_Watermark -> Some({
                                 EntityType = enum(LanguagePrimitives.EnumToValue entity.EntityType + 1)
                                 Position = getBuildPos entity                  
                             })
+                            | EntityType.BuilderUnit -> foreman.GetBuilding entity
                             | _ -> None
 
         let attackAction = match entity.EntityType with
-                            | EntityType.BuilderUnit -> builderManager.GetAttack entity
+                            | EntityType.BuilderUnit -> foreman.GetAttack entity
                             | _ -> Some({
                                       Target = None
                                       AutoAttack = Some({
@@ -133,6 +139,6 @@ type MyStrategy() =
             MoveAction = moveAction
             BuildAction = buildAction
             AttackAction = attackAction
-            RepairAction = builderManager.GetRepair entity
+            RepairAction = foreman.GetRepair entity
         }
         (entity.Id, move)
