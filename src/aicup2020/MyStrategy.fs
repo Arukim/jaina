@@ -40,7 +40,8 @@ type MyStrategy() =
         fieldSize <- {X = playerView.MapSize; Y = playerView.MapSize}
 
         let tactic = new TargetNearestRangedBase()
-        attackHeatMap <- tactic.Run(playerView)
+        if currMelees + currRangeds > 0 then
+            attackHeatMap <- tactic.Run(playerView)
 
         maxUnits <- playerView.Entities |> Seq.filter(fun x -> x.PlayerId = Some(myId))
                                         |> Seq.filter(fun x -> x.EntityType = EntityType.BuilderBase ||
