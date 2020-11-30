@@ -56,7 +56,7 @@ type Architect(playerView: PlayerView) =
         for i in 0..tiles.Length-1 do
             let v = tiles.[i]
             if v = TileState.Building then
-                Tiles.neighboursPlusOf mapSize i 
+                Array2d.neighboursPlusOf mapSize i 
                     |> Seq.iter(fun x -> if tiles.[x] = TileState.Empty then tiles.[x] <- TileState.SafeZone)
         
         //place resources

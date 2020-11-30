@@ -38,9 +38,10 @@
         <Compile Include="Core\Diag.fs" />
         <Compile Include="Core\ViewHelper.fs" />
         <Compile Include="Collections\PriorityQ.fs" />
-        <Compile Include="Algo\Tiles.fs" />
+        <Compile Include="Algo\Array2d.fs" />
+        <Compile Include="Algo\Cells.fs" />
         <Compile Include="Algo\Pathfinder.fs" />
-        <Compile Include="Logic\Tactics\TargetNearestRangedBase.fs" />
+        <Compile Include="Logic\HeatAttack.fs" />
         <Compile Include="Logic\Architect.fs" />
         <Compile Include="Logic\Foreman.fs" />
         <Compile Include="DebugInterface.fs" />

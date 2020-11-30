@@ -1,10 +1,10 @@
-﻿namespace Jaina.Logic.Tactics
+﻿namespace Jaina.Logic
 
 open Aicup2020.Model
 open Jaina.Algo
 open Jaina.Core
 
-type TargetNearestRangedBase(playerView: PlayerView) =
+type HeatAttack(playerView: PlayerView) =
     member _.buildWalkMap =
         let entities = playerView.Entities
         let matchSomeBuilding = fun x -> match x.EntityType with
@@ -54,6 +54,3 @@ type TargetNearestRangedBase(playerView: PlayerView) =
                                             match walkMap.TryFind next with
                                                 | Some q -> q
                                                 | _ -> 1u)
-                   | _ -> Map.empty      
-                            
-

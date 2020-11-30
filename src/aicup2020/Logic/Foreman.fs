@@ -30,8 +30,8 @@ type Foreman(playerView: PlayerView, architect: Architect) =
 
     member private this.TargetPos unit pos entityType  =
         let size = playerView.EntityProperties.[entityType].Size
-        Pathfinder.outerBorders mapSize size pos
-            |> Seq.sortBy(fun x -> Pathfinder.dist x unit.Position)
+        Cells.outerBorders mapSize size pos
+            |> Seq.sortBy(fun x -> Cells.dist x unit.Position)
             |> Seq.head
 
     member private this.SelectRepairs availableWorkers =

@@ -1,6 +1,6 @@
 ﻿namespace Jaina.Algo
 
-module Tiles =
+module Array2d =
     let neighboursOf size pos =
         seq {
             let (x,y) = pos % size, pos / size

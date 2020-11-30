@@ -3,7 +3,6 @@ namespace Aicup2020
 open Aicup2020.Model
 open Jaina.Algo
 open Jaina.Logic
-open Jaina.Logic.Tactics
 open Jaina.Core
 
 type MyStrategy() =
@@ -32,7 +31,7 @@ type MyStrategy() =
         maxBuilders <- Config.Base_Builders_Count + (ViewHelper.ownEntitiesOf playerView EntityType.House |> Seq.length)
 
         if currMelees + currRangeds > 0 && playerView.CurrentTick % Config.Attack_Map_Refresh_Rate = 0 then            
-            let tactic = new TargetNearestRangedBase(playerView)
+            let tactic = new HeatAttack(playerView)
             attackHeatMap <- tactic.Run(playerView)
 
         architect <- Some(new Architect(playerView))
@@ -61,7 +60,7 @@ type MyStrategy() =
         let myPos = attackHeatMap.TryFind(entity.Position)
         match myPos with
             | Some p -> 
-                    let (pos, _) = Pathfinder.neighboursOf view.Value.MapSize entity.Position 
+                    let (pos, _) = Cells.neighboursOf view.Value.MapSize entity.Position 
                                 |> Seq.map(fun x -> (x, attackHeatMap.[x]))
                                 // psedo-randomize movement. Instead of always following NNNWWW pattern
                                 // use something like NWNWWN. GetHasCode makes it stable for all units,
@@ -92,11 +91,6 @@ type MyStrategy() =
                                                                 FindClosestPosition = true
                                                                 BreakThrough = breakThrough         
                                                             })
-                                                            //| _ -> Some({
-                                                            //    Target = globalDefenceTarget
-                                                            //    FindClosestPosition = true
-                                                            //    BreakThrough = breakThrough         
-                                                            //})
                             | _ -> None
 
         let getBuildPos entity = {
