@@ -3,6 +3,7 @@
 open Aicup2020.Model
 open Jaina.Core
 open Jaina.Collections
+open Jaina.Algo
 
 type WorkerRole =
     | Miner
@@ -13,6 +14,7 @@ type Worker = {Role: WorkerRole; Target: Option<Vec2Int>}
 
 type Foreman(playerView: PlayerView, architect: Architect) =
     let myId = playerView.MyId
+    let mapSize = playerView.MapSize
     let totalWorkers = ViewHelper.countOwnUnits playerView EntityType.BuilderUnit
     let workers = Map.empty
     let calcDist a b = (uint)((a.X-b.X)*(a.X-b.X) + (a.Y-b.Y)*(a.Y-b.Y))
@@ -22,7 +24,17 @@ type Foreman(playerView: PlayerView, architect: Architect) =
 
     let sightRange = (playerView.EntityProperties.TryFind EntityType.BuilderUnit).Value.SightRange
 
-    member private this.selectRepairs availableWorkers =
+    
+    member private this.TargetPosBuilding unit entity = 
+        this.TargetPos unit entity.Position entity.EntityType
+
+    member private this.TargetPos unit pos entityType  =
+        let size = playerView.EntityProperties.[entityType].Size
+        Pathfinder.outerBorders mapSize size pos
+            |> Seq.sortBy(fun x -> Pathfinder.dist x unit.Position)
+            |> Seq.head
+
+    member private this.SelectRepairs availableWorkers =
         let damagedBuildings = playerView.Entities |> Seq.filter(fun x -> x.PlayerId = Some(myId))
                                                    |> ViewHelper.filterBuildings
                                                    |> Seq.filter(fun x -> x.Health < playerView.EntityProperties.[x.EntityType].MaxHealth)
@@ -49,7 +61,7 @@ type Foreman(playerView: PlayerView, architect: Architect) =
     
         let availableWorkers = ViewHelper.ownEntitiesOf playerView EntityType.BuilderUnit
 
-        this.selectRepairs availableWorkers
+        this.SelectRepairs availableWorkers
 
         let minersOrBuilders = totalWorkers - (repairTargets |> Seq.length)
 
@@ -81,22 +93,19 @@ type Foreman(playerView: PlayerView, architect: Architect) =
         let worker = workers.[entity]
         match worker.Role with
             | WorkerRole.Repairman ->          
-                let target = worker.Target.Value 
+                let building = repairTargets.[entity]
                 Some({
-                    Target = {X = target.X + 1; Y = target.Y - 1}
+                    Target = this.TargetPosBuilding entity building
                     FindClosestPosition = true
                     BreakThrough = false
                 })
             | WorkerRole.Builder ->
                 let target = worker.Target.Value 
-                let building = fst buildTargets.[entity]
-                let size = playerView.EntityProperties.[building].Size
-                // it's not so easy to build near borders
-                let xShift = if target.X = 0 then size-1 else 0
-                let yShift = if target.Y = 0 then size-1 else -1
+                let buildingType = fst buildTargets.[entity]         
+                let pos = this.TargetPos entity target buildingType
 
                 Some({
-                    Target = {X = target.X + xShift; Y = target.Y + yShift}
+                    Target = pos
                     FindClosestPosition = true
                     BreakThrough = false
                 })

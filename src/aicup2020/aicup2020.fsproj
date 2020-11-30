@@ -1,8 +1,9 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <TargetFramework>netcoreapp5.0</TargetFramework>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <ItemGroup>
@@ -36,6 +37,7 @@
         <Compile Include="Core\PerfMeter.fs" />
         <Compile Include="Core\Diag.fs" />
         <Compile Include="Core\ViewHelper.fs" />
+        <Compile Include="Core\Logger.fs" />
         <Compile Include="Collections\PriorityQ.fs" />
         <Compile Include="Algo\Tiles.fs" />
         <Compile Include="Algo\Pathfinder.fs" />

@@ -29,7 +29,7 @@ type Architect(playerView: PlayerView) =
                 for y in 0..2 do
                     if tiles.[i + x + y * mapSize] <> TileState.Empty then
                         isFree <- false
-            else isFree <- false
+        else isFree <- false
         isFree
 
     let getSpaces3X (tiles:TileState[]) =

@@ -13,9 +13,9 @@ type MyStrategy() =
     let mutable currRangeds = 0
     let mutable currUnits = 0
     let mutable myId = 0
+    let mutable me = None
     let mutable maxUnits = 15
     let mutable attackHeatMap = Map.empty
-    let mutable fieldSize = {X=0; Y=0;}
     let mutable foreman = None
     let mutable architect = None
     let mutable maxBuilders = Config.Base_Builders_Count
@@ -23,6 +23,7 @@ type MyStrategy() =
     member this.getAction(playerView: PlayerView, debugInterface: Option<DebugInterface>): Action =
         view <- Some(playerView)
         myId <- playerView.MyId
+        me <- Some(playerView.Players |> Array.find(fun x -> x.Id = myId))
 
         currBuilders <- ViewHelper.countOwnUnits playerView EntityType.BuilderUnit
         currMelees <- ViewHelper.countOwnUnits playerView EntityType.MeleeUnit
@@ -30,11 +31,9 @@ type MyStrategy() =
         currUnits <- currBuilders + currMelees + currRangeds
         maxBuilders <- Config.Base_Builders_Count + (ViewHelper.ownEntitiesOf playerView EntityType.House |> Seq.length)
 
-        fieldSize <- {X = playerView.MapSize; Y = playerView.MapSize}
-
         if currMelees + currRangeds > 0 && playerView.CurrentTick % Config.Attack_Map_Refresh_Rate = 0 then            
             let tactic = new TargetNearestRangedBase(playerView)
-            Diag.elapsedRelease "AHM Run" (fun () -> attackHeatMap <- tactic.Run(playerView))
+            attackHeatMap <- tactic.Run(playerView)
 
         architect <- Some(new Architect(playerView))
         architect.Value.Init()
@@ -62,7 +61,7 @@ type MyStrategy() =
         let myPos = attackHeatMap.TryFind(entity.Position)
         match myPos with
             | Some p -> 
-                    let (pos, _) = Pathfinder.neighboursOf fieldSize entity.Position 
+                    let (pos, _) = Pathfinder.neighboursOf view.Value.MapSize entity.Position 
                                 |> Seq.map(fun x -> (x, attackHeatMap.[x]))
                                 // psedo-randomize movement. Instead of always following NNNWWW pattern
                                 // use something like NWNWWN. GetHasCode makes it stable for all units,
@@ -114,7 +113,7 @@ type MyStrategy() =
                                 EntityType = enum(LanguagePrimitives.EnumToValue entity.EntityType + 1)
                                 Position = getBuildPos entity                         
                             })
-                            | EntityType.MeleeBase when playerView.Players.[myId-1].Resource >= Config.Build_Warrior_Watermark -> Some({
+                            | EntityType.MeleeBase when me.Value.Resource >= Config.Build_Warrior_Watermark -> Some({
                                 EntityType = enum(LanguagePrimitives.EnumToValue entity.EntityType + 1)
                                 Position = getBuildPos entity                  
                             })
@@ -133,12 +132,12 @@ type MyStrategy() =
                                       })
                                   })
         
-      
+        let repairAction = foreman.GetRepair entity
 
         let move = {
             MoveAction = moveAction
-            BuildAction = buildAction
+            BuildAction = buildAction 
             AttackAction = attackAction
-            RepairAction = foreman.GetRepair entity
+            RepairAction = repairAction
         }
         (entity.Id, move)

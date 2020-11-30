@@ -37,8 +37,6 @@ type TargetNearestRangedBase(playerView: PlayerView) =
         resources |> Seq.append ownBuildings |> Map.ofSeq
 
     member this.Run (playerView: PlayerView) =
-        let field = {X = playerView.MapSize; Y = playerView.MapSize}
-
         let walkMap = this.buildWalkMap
 
         let enemySelector = fun x -> match x.EntityType with
@@ -52,7 +50,7 @@ type TargetNearestRangedBase(playerView: PlayerView) =
         let targets = playerView.Entities |> Seq.filter(fun x -> x.PlayerId <> Some(playerView.MyId))
                                           |> Seq.choose enemySelector
         match Seq.isEmpty targets with
-                   | _ -> Pathfinder.aStarField field targets (fun (_, next) ->
+                   | _ -> Pathfinder.aStarField playerView.MapSize targets (fun (_, next) ->
                                             match walkMap.TryFind next with
                                                 | Some q -> q
                                                 | _ -> 1u)
