@@ -8,5 +8,5 @@ module Config =
     let Max_Builders_Count = 6
     let Map_Size = 80
     let Global_Attack_Target = {X= Map_Size - 1; Y = Map_Size - 1}
-    let Build_Warrior_Watermark = 60
-    let Architect_House_Watermark = 90
+    let Build_Warrior_Watermark = 90
+    let Architect_House_Watermark = 60
