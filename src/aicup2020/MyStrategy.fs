@@ -18,7 +18,7 @@ type MyStrategy() =
     let mutable fieldSize = {X=0; Y=0;}
     let mutable foreman = None
     let mutable architect = None
-    let mutable maxBuilders = Config.Max_Builders_Count
+    let mutable maxBuilders = Config.Base_Builders_Count
 
     member this.getAction(playerView: PlayerView, debugInterface: Option<DebugInterface>): Action =
         view <- Some(playerView)
@@ -28,7 +28,7 @@ type MyStrategy() =
         currMelees <- ViewHelper.countOwnUnits playerView EntityType.MeleeUnit
         currRangeds <- ViewHelper.countOwnUnits playerView EntityType.RangedUnit
         currUnits <- currBuilders + currMelees + currRangeds
-        maxBuilders <- Config.Max_Builders_Count + (ViewHelper.ownEntitiesOf playerView EntityType.House |> Seq.length)
+        maxBuilders <- Config.Base_Builders_Count + (ViewHelper.ownEntitiesOf playerView EntityType.House |> Seq.length)
 
         fieldSize <- {X = playerView.MapSize; Y = playerView.MapSize}
 
