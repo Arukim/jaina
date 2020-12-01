@@ -29,12 +29,23 @@ type HeatAttack(playerView: PlayerView) =
                                 match x.EntityType with 
                                     | EntityType.Resource -> Some(x.Position, Config.Resource_Tile_Walk_Price)
                                     | _ -> None)
+
+        let ownUnits = ViewHelper.ownEntities playerView 
+                                    |> Seq.choose(fun x ->
+                                match x.EntityType with
+                                    | EntityType.BuilderUnit -> Some(x.Position, Config.BuilderUnit_Tile_Walk_Price)
+                                    | EntityType.MeleeUnit
+                                    | EntityType.RangedUnit -> Some(x.Position, Config.CombatUnit_Tile_Walk_Price)
+                                    | _ -> None)
+                                    
         let ownBuildings = entities |> Seq.filter(fun x -> x.PlayerId = Some(playerView.MyId))
                                     |> Seq.choose matchSomeBuilding
                                     |> Seq.map getObjectTiles
                                     |> Seq.collect(fun x -> x)
         
-        resources |> Seq.append ownBuildings |> Map.ofSeq
+        resources |> Seq.append ownUnits 
+                  |> Seq.append ownBuildings 
+                  |> Map.ofSeq
 
     member this.Run (playerView: PlayerView) =
         let walkMap = this.buildWalkMap
