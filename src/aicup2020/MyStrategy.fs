@@ -17,7 +17,7 @@ type MyStrategy() =
     let mutable attackHeatMap = Map.empty
     let mutable foreman = None
     let mutable architect = None
-    let mutable maxBuilders = Config.Base_Builders_Count
+    let mutable maxBuilders = Config.Builders_Base_Limit
 
     member this.getAction(playerView: PlayerView, debugInterface: Option<DebugInterface>): Action =
         view <- Some(playerView)
@@ -28,7 +28,7 @@ type MyStrategy() =
         currMelees <- ViewHelper.countOwnUnits playerView EntityType.MeleeUnit
         currRangeds <- ViewHelper.countOwnUnits playerView EntityType.RangedUnit
         currUnits <- currBuilders + currMelees + currRangeds
-        maxBuilders <- Config.Base_Builders_Count + (ViewHelper.ownEntitiesOf playerView EntityType.House |> Seq.length)
+        maxBuilders <- Config.Builders_Base_Limit + (ViewHelper.ownEntitiesOf playerView EntityType.House |> Seq.length) * Config.Builders_Per_House
 
         if currMelees + currRangeds > 0 && playerView.CurrentTick % Config.Attack_Map_Refresh_Rate = 0 then            
             let tactic = new HeatAttack(playerView)
