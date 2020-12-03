@@ -1,6 +1,5 @@
 ﻿namespace Jaina.Algo
 
-open Aicup2020.Model
 open Jaina.Collections
 
 module Pathfinder =

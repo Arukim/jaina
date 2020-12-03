@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
@@ -33,17 +33,33 @@
         <Compile Include="Model/ServerMessage.fs" />
         <Compile Include="Model/Camera.fs" />
         <Compile Include="Model/DebugState.fs" />
-        <Compile Include="Core\Config.fs" />
-        <Compile Include="Core\PerfMeter.fs" />
-        <Compile Include="Core\Diag.fs" />
-        <Compile Include="Core\ViewHelper.fs" />
         <Compile Include="Collections\PriorityQ.fs" />
         <Compile Include="Algo\Array2d.fs" />
         <Compile Include="Algo\Cells.fs" />
         <Compile Include="Algo\Pathfinder.fs" />
+        <Compile Include="Core\Config.fs" />
+        <Compile Include="Core\PerfMeter.fs" />
+        <Compile Include="Core\Diag.fs" />
+        <Compile Include="Core\View.fs" />
+        <Compile Include="Core\BuildableTiles.fs" />
+        <Compile Include="Core\GameState.fs" />
         <Compile Include="Logic\HeatAttack.fs" />
-        <Compile Include="Logic\Architect.fs" />
-        <Compile Include="Logic\Foreman.fs" />
+        <Compile Include="Logic\LogicUnit.fs" />
+        <Compile Include="Logic\Tactics\Tactics.fs" />
+        <Compile Include="Logic\Tactics\Foreman.fs" />
+        <Compile Include="Logic\Tactics\Mechanic.fs" />
+        <Compile Include="Logic\Tactics\Miner.fs" />
+        <Compile Include="Logic\Tactics\Fabric.fs" />
+        <Compile Include="Logic\Tactics\RushCorporal.fs" />
+        <Compile Include="Logic\Tactics\Idler.fs" />
+        <Compile Include="Logic\Management\Manager.fs" />
+        <Compile Include="Logic\Management\RawManager.fs" />
+        <Compile Include="Logic\Management\Fabricant.fs" />
+        <Compile Include="Logic\Management\Upkeep.fs" />
+        <Compile Include="Logic\Management\Architect.fs" />
+        <Compile Include="Logic\Management\OffensiveGeneral.fs" />
+        <Compile Include="Logic\Strategy\Strategy.fs" />
+        <Compile Include="Logic\Strategy\DefaultStrategy.fs" />
         <Compile Include="DebugInterface.fs" />
         <Compile Include="MyStrategy.fs" />
         <Compile Include="Runner.fs" />
