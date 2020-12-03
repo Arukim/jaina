@@ -70,6 +70,7 @@ type Architect(playerView: PlayerView) =
 
     member this.GetBuildings() =
         seq {
-            if me.Resource >= Config.Architect_House_Watermark && spaces3x.Length > 0 then
+            if me.Resource >= Config.Architect_House_Watermark && spaces3x.Length > 0 
+                                && EntityType.House |> ViewHelper.countOwnUnits playerView < Config.Max_Houses then
                 yield (EntityType.House, spaces3x |> Array.head)
         }
