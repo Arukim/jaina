@@ -11,6 +11,6 @@ module Config =
     let Builders_Per_House = 2
     let Max_Houses = 30
     let Map_Size = 80
-    let Global_Attack_Target = {X= Map_Size - 1; Y = Map_Size - 1}
+    let Global_Attack_Targets = [{X= Map_Size - 1; Y = Map_Size - 1}; {X=0; Y = Map_Size - 1}; {X = Map_Size - 1; Y = 0}]
     let Build_Warrior_Watermark = 90
     let Architect_House_Watermark = 60

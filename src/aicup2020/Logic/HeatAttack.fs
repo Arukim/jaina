@@ -4,8 +4,11 @@ open Aicup2020.Model
 open Jaina.Algo
 open Jaina.Core
 
-type HeatAttack(playerView: PlayerView) =
-    member _.buildWalkMap =
+[<AbstractClass>]
+type HeatAttack() =
+    static let mutable attackMap = Map.empty
+    
+    static member private buildWalkMap playerView =
         let entities = playerView.Entities
         let matchSomeBuilding = fun x -> match x.EntityType with
                                             | EntityType.BuilderBase
@@ -30,7 +33,7 @@ type HeatAttack(playerView: PlayerView) =
                                     | EntityType.Resource -> Some(x.Position, Config.Resource_Tile_Walk_Price)
                                     | _ -> None)
 
-        let ownUnits = ViewHelper.ownEntities playerView 
+        let ownUnits = View.ownEntities playerView 
                                     |> Seq.choose(fun x ->
                                 match x.EntityType with
                                     | EntityType.BuilderUnit -> Some(x.Position, Config.BuilderUnit_Tile_Walk_Price)
@@ -47,8 +50,8 @@ type HeatAttack(playerView: PlayerView) =
                   |> Seq.append ownBuildings 
                   |> Map.ofSeq
 
-    member this.Run (playerView: PlayerView) =
-        let walkMap = this.buildWalkMap
+    static member Update (playerView: PlayerView) =
+        let walkMap = playerView |> HeatAttack.buildWalkMap
 
         let enemySelector = fun x -> match x.EntityType with
                                      | EntityType.RangedBase -> Some((x.Position, 0u))
@@ -60,8 +63,9 @@ type HeatAttack(playerView: PlayerView) =
 
         let targets = playerView.Entities |> Seq.filter(fun x -> x.PlayerId <> Some(playerView.MyId))
                                           |> Seq.choose enemySelector
-        match Seq.isEmpty targets with
-                   | _ -> Pathfinder.aStarField playerView.MapSize targets (fun (_, next) ->
-                                            match walkMap.TryFind next with
+        let fieldWeightFunc (_, next) = match walkMap.TryFind next with
                                                 | Some q -> q
-                                                | _ -> 1u)
+                                                | _ -> 1u
+        attackMap <- Pathfinder.aStarField playerView.MapSize targets fieldWeightFunc
+
+    static member AttackMap with get() = attackMap
