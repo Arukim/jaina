@@ -20,9 +20,15 @@ type DefaultStrategy(playerView: PlayerView) =
         [EntityType.BuilderUnit, 20;
          EntityType.House, 4];
         [EntityType.BuilderUnit, 30;
-          EntityType.House, 9];        
+          EntityType.House, 9];
         [EntityType.BuilderUnit, 40;
-          EntityType.House, 14];        
+          EntityType.House, 14];
+        [EntityType.BuilderUnit, 50;
+            EntityType.House, 19];
+        [EntityType.BuilderUnit, 60;
+            EntityType.House, 24];
+        [EntityType.BuilderUnit, 65;
+            EntityType.House, 27];
         [EntityType.RangedBase, 2];
         [EntityType.MeleeBase, 2];
     ]
