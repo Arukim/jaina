@@ -83,15 +83,19 @@ def worker(args):
                 stream = None
             #print("starting strategies")
             subprocess.Popen([p2 if swap else p1, "127.0.0.1", str(port1), "0000000000000000"], stdout=stream, stderr=stream)
-            subprocess.Popen([p1 if swap else p2, "127.0.0.1", str(port2), "0000000000000000"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            subprocess.Popen([p2 if swap else p1, "127.0.0.1", str(port3), "0000000000000000"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            subprocess.Popen([p2 if swap else p1, "127.0.0.1", str(port2), "0000000000000000"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            subprocess.Popen([p1 if swap else p2, "127.0.0.1", str(port3), "0000000000000000"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             subprocess.Popen([p1 if swap else p2, "127.0.0.1", str(port4), "0000000000000000"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             #print("started processes")
             process.wait()
             #print("waited processes")
             with open(result_path) as result_inp:
-                result = json.load(result_inp)
-                log.info("game with seed=%d results: %d - %d - %d - %d", seed, result["results"][swap], result["results"][1 - swap], result["results"][1 + swap], result["results"][3 - swap])
+                result = json.load(result_inp)                
+                res = result['results']
+                if swap:
+                    (res[0],res[2])=(res[2], res[0])
+                    (res[1],res[3])=(res[3], res[1])
+                log.info("game with seed=%d results: %d - %d - %d - %d", seed, res[0], res[1], res[2], res[3])
                 #print(" - ".join([("CRASHERD " if result["players"][i]["crashed"] else "") + str(result["results"][i]) for i in range(2)]))
     except Exception:
         log.error(traceback.format_exc())
@@ -110,7 +114,7 @@ def start_process():
 @click.option('--start-seed', type=int, default=1)
 @click.option('--level', type=str, default="Round1")
 @click.option('--nthreads', type=int, default=8)
-@click.option('--count', type=int, default=32)
+@click.option('--count', type=int, default=1000)
 @click.option('--team-size', type=int, default=2)
 @click.option('--profile-mode', is_flag=False)
 def run(p1, p2, lr_bin, start_seed, level, nthreads, count, team_size, profile_mode):

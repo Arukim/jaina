@@ -57,12 +57,12 @@ def process(full_path):
 				#print(j['results'])
 				res = j['results']
 				if swap:
-					(res[0],res[1])=(res[1], res[0])
-					(res[2],res[3])=(res[3], res[2])
+					(res[0],res[2])=(res[2], res[0])
+					(res[1],res[3])=(res[3], res[1])
 
 				max_value = max(res)
-				max_index = j['results'].index(max_value)
-				if max_index % 2 == 0:
+				max_index = res.index(max_value)
+				if max_index < 2:
 					won_new = won_new + 1
 				else:
 					won_old = won_old + 1
