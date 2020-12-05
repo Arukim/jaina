@@ -53,10 +53,11 @@ type DefaultStrategy(playerView: PlayerView) =
                                 |> List.tryHead
                                 
           
-        let economics = match currStage with
+        let economics = [new Upkeep(playerView)] @
+                        match currStage with
                             | Some stage -> this.GetEconomics stage
                             | _ -> []
-                            @ [new Upkeep(playerView); RawManager(playerView)]:list<Manager>
+                        @ [ RawManager(playerView)]:list<Manager>
 
         let recruiment = this.GetRecruitment recruitPlan
 

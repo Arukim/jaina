@@ -8,5 +8,5 @@ type LogicUnit(playerView: PlayerView) =
     member this.EntityProps entity = 
         playerView.EntityProperties.[entity.EntityType]
     
-    member this.Props entityType = 
+    member this.EntityTypeProps entityType = 
         playerView.EntityProperties.[entityType]

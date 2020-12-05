@@ -38,7 +38,7 @@ type Architect(playerView: PlayerView, gameState:GameState, order:(EntityType*in
         let tiles = gameState.BuildableTiles
 
         let chooseBuilding entityType =
-            let size = (this.Props entityType).Size
+            let size = (this.EntityTypeProps entityType).Size
             let spaces = tiles |> getSpaces size |> Seq.sortBy(fun x -> Cells.dist {X=0;Y=0} x)
             let space = Seq.tryHead spaces
             match space with

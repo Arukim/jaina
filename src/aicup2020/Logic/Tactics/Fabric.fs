@@ -15,7 +15,7 @@ type Fabric(playerView: PlayerView, unitType: EntityType, count) =
             Y = entity.Position.Y + (this.EntityProps entity).Size - 1
         }
 
-        let createBuilder = fun fabric -> 
+        let createUnit = fun fabric -> 
             let buildAction = Some({
                 EntityType = enum(LanguagePrimitives.EnumToValue fabric.EntityType + 1)
                 Position = getBuildPos fabric                              
@@ -28,7 +28,7 @@ type Fabric(playerView: PlayerView, unitType: EntityType, count) =
             })
 
         let actions = fabrics |> Seq.truncate count
-                              |> Seq.map createBuilder
+                              |> Seq.map createUnit
                               |> List.ofSeq
                              
         let others = this.FilterInactive entities actions

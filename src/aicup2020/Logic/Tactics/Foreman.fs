@@ -30,8 +30,8 @@ type Foreman(playerView: PlayerView, entityType: EntityType, position: Vec2Int) 
                 RepairAction = None
             })    
 
-
-        let worker = workers |> Seq.sortBy(fun x -> Cells.dist x.Position position)
+        let size = (this.EntityTypeProps entityType).Size
+        let worker = workers |> Seq.sortBy(fun x -> Cells.distToBuilding x.Position position size)
                              |> Seq.tryHead
         match worker with
             | Some w -> 

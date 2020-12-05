@@ -16,5 +16,6 @@ type Tactics(playerView: PlayerView) =
     member this.SelectBuilderPos unit pos entityType  =
         let size = playerView.EntityProperties.[entityType].Size
         Cells.outerBorders playerView.MapSize size pos
+            |> Seq.filter(fun x -> not(playerView.Entities |> Seq.exists(fun e -> e.Position = x)))
             |> Seq.sortBy(fun x -> Cells.dist x unit.Position)
             |> Seq.head
