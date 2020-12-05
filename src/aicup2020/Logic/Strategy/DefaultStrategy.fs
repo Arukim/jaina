@@ -76,7 +76,7 @@ type DefaultStrategy(playerView: PlayerView) =
             match gameState.CanAfford recruit with
                 | true -> 
                     gameState.PlanBuild recruit
-                    Some(new Fabricant(playerView, (recruit, 1)) :> Manager)
+                    Some(new Fabricant(playerView, gameState, (recruit, 1)) :> Manager)
                 | _ -> None)
 
     member this.GetEconomics stage =
@@ -101,5 +101,5 @@ type DefaultStrategy(playerView: PlayerView) =
                 |> List.choose(fun (key, values) ->
                     match key with
                     | 0 -> Some(new Architect(playerView, gameState, values) :> Manager)
-                    | 1 -> Some(new Fabricant(playerView, values |> List.head) :> Manager)
+                    | 1 -> Some(new Fabricant(playerView, gameState, values |> List.head) :> Manager)
                     | _ -> None)        

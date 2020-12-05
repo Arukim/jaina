@@ -40,8 +40,8 @@ module BuildableTiles =
                 | _ -> ()
           
        //place resources
-       View.entitiesOf playerView EntityType.Resource
-           |> Seq.iter(fun x -> tiles.[getPos x.Position] <- TileBuildState.Resource)
+       playerView |> View.entitiesOf EntityType.Resource
+                  |> Seq.iter(fun x -> tiles.[getPos x.Position] <- TileBuildState.Resource)
        tiles
 
     let occupy pos size mapSize tiles =

@@ -12,7 +12,7 @@ type Mechanic(playerView: PlayerView) =
         let workers = entities |> List.filter(fun x -> x.EntityType = EntityType.BuilderUnit)
 
         let createAction worker building =
-            let targetPos = this.SelectBuilderPos worker building.Position building.EntityType
+            let targetPos = this.SelectBuilderPos worker.Position building.Position building.EntityType
             let moveAction = Some({
                 Target = targetPos
                 FindClosestPosition = true

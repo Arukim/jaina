@@ -11,11 +11,11 @@ type Foreman(playerView: PlayerView, entityType: EntityType, position: Vec2Int) 
         let workers = entities |> Seq.filter (fun x -> x.EntityType = EntityType.BuilderUnit)
 
         let createAction worker =
-            let builderPos = this.SelectBuilderPos worker position entityType
+            let builderPos = this.SelectBuilderPos worker.Position position entityType
 
             let moveAction = Some({
                 Target = builderPos
-                FindClosestPosition = true
+                FindClosestPosition = false
                 BreakThrough = false
             })
             let buildAction = Some({

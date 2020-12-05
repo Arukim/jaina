@@ -38,11 +38,13 @@
         <Compile Include="Algo\Array2d.fs" />
         <Compile Include="Algo\Cells.fs" />
         <Compile Include="Algo\Pathfinder.fs" />
+        <Compile Include="Algo\PotentialField.fs" />
         <Compile Include="Core\Config.fs" />
         <Compile Include="Core\PerfMeter.fs" />
         <Compile Include="Core\Diag.fs" />
         <Compile Include="Core\View.fs" />
         <Compile Include="Core\BuildableTiles.fs" />
+        <Compile Include="Core\UnitFactory.fs" />
         <Compile Include="Core\GameState.fs" />
         <Compile Include="Logic\HeatAttack.fs" />
         <Compile Include="Logic\LogicUnit.fs" />

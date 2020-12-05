@@ -1,19 +1,7 @@
 ﻿namespace Jaina.Core
 
 open Aicup2020.Model
-
-type UnitFactory = {
-    Current: int
-    mutable Capacity: int
-    mutable Enlisted: int
-} with 
-    member this.Inflation = this.Current + this.Enlisted + 1
-    member this.HasCapacity = this.Enlisted < this.Capacity
-    member this.EnlistSingle() = 
-        if this.Enlisted < this.Capacity then
-            this.Enlisted <- this.Enlisted + 1
-        else invalidOp "Capacity reached"
-
+open Jaina.Algo
 
 type GameState(playerView: PlayerView) = 
     
@@ -23,6 +11,12 @@ type GameState(playerView: PlayerView) =
     let builderBases = playerView |> View.countOwnUnits  EntityType.BuilderBase
     let meleeBases = playerView |> View.countOwnUnits  EntityType.MeleeBase
     let rangedBases = playerView |> View.countOwnUnits  EntityType.RangedBase
+    let minerals = playerView 
+                    |> View.entitiesOf EntityType.Resource
+                    |> Seq.groupBy(fun x -> x.Position) 
+                    |> Seq.map(fun (pos, entity) -> (pos, entity |> Seq.sumBy(fun x -> x.Health)))
+                    |> Map.ofSeq
+                     
     let totalUnits = builders + melees + rangeds
     let maxUnits = playerView |> View.ownEntities
                               |> View.filterHousing
@@ -39,6 +33,14 @@ type GameState(playerView: PlayerView) =
 
     let buildableTiles = BuildableTiles.construct playerView       
 
+    let translateResources pos =
+        match minerals.TryFind pos with
+            | Some x -> x
+            | _ -> 0
+     
+    let resourcesField = PotentialField.create(playerView.MapSize, 5, translateResources)
+
+
     member _.Resources
         with get() = resources
 
@@ -47,6 +49,8 @@ type GameState(playerView: PlayerView) =
 
     member _.MeleeBases with get() = meleeBases
     member _.RangedBases with get() = rangedBases
+
+    member _.ResourcesField with get() = resourcesField
 
     member this.PlanBuild entityType =
         resources <- this.Resources - this.GetPrice entityType

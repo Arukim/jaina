@@ -13,9 +13,9 @@ type Tactics(playerView: PlayerView) =
     member this.FilterInactive entities actions =
         entities |> List.filter (fun x -> not(actions |> List.exists(fun (e, _) -> e = x.Id)))
 
-    member this.SelectBuilderPos unit pos entityType  =
+    member this.SelectBuilderPos unitPos pos entityType  =
         let size = playerView.EntityProperties.[entityType].Size
         Cells.outerBorders playerView.MapSize size pos
             |> Seq.filter(fun x -> not(playerView.Entities |> Seq.exists(fun e -> e.Position = x)))
-            |> Seq.sortBy(fun x -> Cells.dist x unit.Position)
+            |> Seq.sortBy(fun x -> Cells.dist x unitPos)
             |> Seq.head
