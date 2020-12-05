@@ -27,9 +27,7 @@ type RushCorporal(playerView: PlayerView) =
     override this.Execute entities =
 
         let createPrivate = fun entity ->
-
-            let breakThrough = entity.Position.X > 20 || entity.Position.Y > 20
-        
+                
             let attackAction = Some({
                 Target = None 
                 AutoAttack = Some({
@@ -42,7 +40,7 @@ type RushCorporal(playerView: PlayerView) =
                                 | EntityType.MeleeUnit -> Some({
                                                                 Target = this.findAttackTarget entity
                                                                 FindClosestPosition = true
-                                                                BreakThrough = breakThrough         
+                                                                BreakThrough = true         
                                                             })
                                 | _ -> None
 
