@@ -15,7 +15,7 @@ type DefaultStrategy(playerView: PlayerView) =
          EntityType.RangedBase, 1;
          EntityType.MeleeBase, 1;]
         // power-up builders
-        [EntityType.BuilderUnit, 7];
+        [EntityType.BuilderUnit, 10];
         // get some houses
         [EntityType.House, 2;
           EntityType.BuilderUnit, 11];
