@@ -33,6 +33,7 @@
         <Compile Include="Model/ServerMessage.fs" />
         <Compile Include="Model/Camera.fs" />
         <Compile Include="Model/DebugState.fs" />
+        <Compile Include="Collections\Seq.fs" />
         <Compile Include="Collections\PriorityQ.fs" />
         <Compile Include="Algo\Array2d.fs" />
         <Compile Include="Algo\Cells.fs" />

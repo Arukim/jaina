@@ -2,8 +2,8 @@
 
 open Aicup2020.Model
 open Jaina.Core
-open Jaina.Collections
 open Jaina.Algo
+open Jaina.Collections
 
 type Mechanic(playerView: PlayerView) =
     inherit Tactics(playerView)
@@ -38,21 +38,37 @@ type Mechanic(playerView: PlayerView) =
         let damagedBuildings = playerView  |> View.ownEntities
                                            |> View.filterBuildings
                                            |> Seq.filter(fun x -> x.Health < (this.EntityProps x).MaxHealth)
-
         
-        let totalWorkers = availableWorkers |> List.length
-
-        let repairWorkers = min (damagedBuildings |> Seq.length) totalWorkers
-        let queue = availableWorkers |> Seq.collect(fun a -> damagedBuildings |> Seq.map (fun b -> a,b))
-                                     |> Seq.sortBy(fun (a,b) -> Cells.dist a.Position b.Position)
+        let queue = availableWorkers 
+                    |> Seq.collect(fun a -> damagedBuildings 
+                                            |> Seq.map (fun b -> 
+                                                let dist = Cells.distToBuilding a.Position b.Position (this.EntityProps b).Size
+                                                dist, (a,b)))
+                                     |> Seq.sortBy(fun (d,_) -> d)
                                      |> List.ofSeq
                
         let mutable matches = Map.empty
-        let mutable toRepair = damagedBuildings |> Set.ofSeq
 
-        for i in 1..repairWorkers do
-            for (worker, building) in queue do
-                if not(matches.ContainsKey(worker)) && toRepair.Contains(building) then
-                    matches <- matches.Add (worker, building)
-                    toRepair <- toRepair.Remove(building)                 
+
+        // find initial repairman
+        damagedBuildings |> Seq.iter (fun building ->
+            let repairMatch = queue |> List.filter(fun (_, (w,b)) -> b = building && not(matches.ContainsKey(w)))
+                                    |> List.tryHead
+            match repairMatch with
+                | Some (_, (w,b)) -> 
+                    matches <- matches.Add (w, b)
+                | _ -> ())
+        
+        // assign additional repairmans
+        damagedBuildings |> Seq.iter (fun building ->
+             let repairMatches = queue |> List.filter(fun (d, _) -> d < Config.RepairAssistDistance)
+                                       |> List.filter(fun (_, (w,b)) -> b = building && not(matches.ContainsKey(w)))
+                                       |> Seq.tryTake Config.RepairAssistMaxCount
+
+             repairMatches |> Seq.iter(fun (_, (w, b)) -> 
+                                          match not(matches.ContainsKey(w)) with
+                                            | true -> 
+                                                matches <- matches.Add (w, b)
+                                            | false -> ()))
+
         matches

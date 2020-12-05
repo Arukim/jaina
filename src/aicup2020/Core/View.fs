@@ -50,3 +50,8 @@ module View =
                                             | EntityType.MeleeUnit -> Some(x)
                                             | _ -> None)
 
+    let isUnit entityType = 
+        entityType = EntityType.BuilderUnit ||
+        entityType = EntityType.MeleeUnit ||
+        entityType = EntityType.RangedUnit
+

@@ -14,3 +14,5 @@ module Config =
     let Global_Attack_Targets = [{X= Map_Size - 1; Y = Map_Size - 1}; {X=0; Y = Map_Size - 1}; {X = Map_Size - 1; Y = 0}]
     let Build_Warrior_Watermark = 90
     let Architect_House_Watermark = 60
+    let RepairAssistDistance = 3
+    let RepairAssistMaxCount = 2

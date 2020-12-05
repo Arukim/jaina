@@ -15,7 +15,7 @@ type Foreman(playerView: PlayerView, entityType: EntityType, position: Vec2Int) 
 
             let moveAction = Some({
                 Target = builderPos
-                FindClosestPosition = false
+                FindClosestPosition = true
                 BreakThrough = false
             })
             let buildAction = Some({

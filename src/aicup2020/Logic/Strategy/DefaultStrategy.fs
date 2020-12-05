@@ -15,20 +15,24 @@ type DefaultStrategy(playerView: PlayerView) =
          EntityType.RangedBase, 1;
          EntityType.MeleeBase, 1;]
         // power-up builders
-        [EntityType.BuilderUnit, 12];
+        [EntityType.BuilderUnit, 7];
         // get some houses
-        [EntityType.BuilderUnit, 20;
-         EntityType.House, 4];
-        [EntityType.BuilderUnit, 30;
-          EntityType.House, 9];
-        [EntityType.BuilderUnit, 40;
-          EntityType.House, 14];
-        [EntityType.BuilderUnit, 50;
-            EntityType.House, 19];
-        [EntityType.BuilderUnit, 60;
-            EntityType.House, 24];
-        [EntityType.BuilderUnit, 65;
-            EntityType.House, 27];
+        [EntityType.House, 2;
+          EntityType.BuilderUnit, 11];
+        [EntityType.House, 4;
+            EntityType.BuilderUnit, 15];
+        [EntityType.House, 6;
+          EntityType.BuilderUnit, 20;];
+        [EntityType.House, 9;
+          EntityType.BuilderUnit, 40;];
+        [EntityType.House, 14;
+          EntityType.BuilderUnit, 50;];
+        [EntityType.House, 19;
+          EntityType.BuilderUnit, 60;];
+        [EntityType.House, 24;
+          EntityType.BuilderUnit, 70;];
+        [EntityType.House, 27;
+          EntityType.BuilderUnit, 75;];
         [EntityType.RangedBase, 2];
         [EntityType.MeleeBase, 2];
     ]
@@ -40,7 +44,6 @@ type DefaultStrategy(playerView: PlayerView) =
         EntityType.MeleeUnit;
     ]
 
-
     let stageIsComplete stage =
         let checkEntity (entity, count) = (playerView |> View.countOwnUnits entity) >= count
         stage |> List.forall checkEntity
@@ -48,6 +51,7 @@ type DefaultStrategy(playerView: PlayerView) =
     override this.Execute() =
         let currStage = stages |> List.skipWhile stageIsComplete
                                 |> List.tryHead
+                                
           
         let economics = match currStage with
                             | Some stage -> this.GetEconomics stage
@@ -98,4 +102,3 @@ type DefaultStrategy(playerView: PlayerView) =
                     | 0 -> Some(new Architect(playerView, gameState, values) :> Manager)
                     | 1 -> Some(new Fabricant(playerView, values |> List.head) :> Manager)
                     | _ -> None)        
-
