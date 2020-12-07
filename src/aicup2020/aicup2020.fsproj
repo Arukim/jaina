@@ -47,6 +47,7 @@
         <Compile Include="State\UnitFactory.fs" />
         <Compile Include="State\Squad.fs" />
         <Compile Include="State\TurnState.fs" />
+        <Compile Include="Logic\ThreatCheck.fs" />
         <Compile Include="Logic\HeatAttack.fs" />
         <Compile Include="Logic\LogicUnit.fs" />
         <Compile Include="Logic\Tactics\Tactics.fs" />

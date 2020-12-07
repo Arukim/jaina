@@ -12,11 +12,30 @@ type TurnState(playerView: PlayerView) =
     let builderBases = playerView |> View.countOwnUnits  EntityType.BuilderBase
     let meleeBases = playerView |> View.countOwnUnits  EntityType.MeleeBase
     let rangedBases = playerView |> View.countOwnUnits  EntityType.RangedBase
+
     let minerals = playerView 
                     |> View.entitiesOf EntityType.Resource
-                    |> Seq.groupBy(fun x -> x.Position) 
-                    |> Seq.map(fun (pos, entity) -> (pos, entity |> Seq.sumBy(fun x -> x.Health)))
+                    |> Seq.map(fun entity -> (entity.Position, entity.Health))
                     |> Map.ofSeq
+
+    let foeUnits = playerView
+                    |> View.foeEntities
+                    |> View.filterMilitaryUnits
+                    |> Seq.map(fun entity -> (entity.Position, entity.Health))
+                    |> Map.ofSeq
+    
+    let ownTerritory = playerView
+                    |> View.ownEntities
+                    |> Seq.choose(fun x -> 
+                        match x.EntityType with 
+                            | EntityType.BuilderUnit
+                            | EntityType.BuilderBase
+                            | EntityType.MeleeBase
+                            | EntityType.RangedBase -> Some((x.Position, x.Health))
+                            | _ -> None)
+                    |> Map.ofSeq
+
+
                      
     let totalUnits = builders + melees + rangeds
     let maxUnits = playerView |> View.ownEntities
@@ -34,12 +53,14 @@ type TurnState(playerView: PlayerView) =
 
     let buildableTiles = BuildableTiles.construct playerView       
 
-    let translateResources pos =
-        match minerals.TryFind pos with
+    let translate (data:Map<Vec2Int, int>) pos =
+        match data.TryFind pos with
             | Some x -> x
             | _ -> 0
      
-    let resourcesField = PotentialField.create(playerView.MapSize, 5, translateResources)
+    let resourcesField = PotentialField.create(playerView.MapSize, Config.PotentialFieldTileSize, minerals |> translate)
+    let foeUnitsField = PotentialField.create(playerView.MapSize,  Config.PotentialFieldTileSize, foeUnits |> translate)
+    let ownTerritoryField = PotentialField.create(playerView.MapSize,  Config.PotentialFieldTileSize, ownTerritory |> translate)
 
 
     member _.Resources
@@ -52,6 +73,8 @@ type TurnState(playerView: PlayerView) =
     member _.RangedBases with get() = rangedBases
 
     member _.ResourcesField with get() = resourcesField
+    member _.FoeUnitsField with get() = foeUnitsField
+    member _.OwnTerritoryField with get() = ownTerritoryField
 
     member this.PlanBuild entityType =
         resources <- this.Resources - this.GetPrice entityType

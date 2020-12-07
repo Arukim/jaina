@@ -4,6 +4,7 @@ open Aicup2020.Model
 open Jaina.Logic.Management
 open Jaina.Core
 open Jaina.State
+open Jaina.Logic
 
 
 type DefaultStrategy(playerView: PlayerView) =
@@ -51,10 +52,7 @@ type DefaultStrategy(playerView: PlayerView) =
         let checkEntity (entity, count) = (playerView |> View.countOwnUnits entity) >= count
         stage |> List.forall checkEntity
 
-    let getSquads() =
-        let units = playerView |> View.ownEntities
-                               |> View.filterMilitaryUnits
-                               |> List.ofSeq
+    let getSquads units =
 
         let collectSquad squad =
             squad |> List.choose(fun m -> units |> Seq.tryFind(fun u -> u.Id = m))
@@ -75,8 +73,12 @@ type DefaultStrategy(playerView: PlayerView) =
         (newSquads |> List.map Squad, leftAlone)        
 
     override this.Execute() =
+
+        let milUnits = playerView |> View.ownEntities
+                           |> View.filterMilitaryUnits
+                           |> List.ofSeq
         
-        let (squads, recruits) = getSquads()
+        let (squads, recruits) = getSquads milUnits
         
         let currStage = stages |> List.skipWhile stageIsComplete
                                |> List.tryHead
@@ -87,8 +89,13 @@ type DefaultStrategy(playerView: PlayerView) =
                             | Some stage -> this.GetEconomics stage
                             | _ -> []
                         @ [ RawManager(playerView)]:list<Manager>
-
+        
         let recruiment = this.GetRecruitment recruitPlan
+
+        let influnceAndThreat = turnState |> ThreatCheck.buildInfluenceThreat
+
+        if influnceAndThreat |> Seq.exists(fun (_, _, t) -> t > 0) then
+            printfn "There is some threat!"
 
         let army = [new OffensiveGeneral(playerView, squads);
             new Recruiter(playerView, recruits)]:Manager list

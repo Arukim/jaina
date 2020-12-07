@@ -8,6 +8,9 @@ module Cells =
 
     let sum a b =
         {X = a.X + b.X; Y = a.Y + b.Y}
+        
+    let toVec size pos =
+        {X = pos % size; Y = pos / size}
 
     // use in calculation of shortest path to a building
     let triPointDist a1 a2 b =

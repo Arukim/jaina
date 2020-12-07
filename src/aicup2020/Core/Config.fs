@@ -18,3 +18,7 @@ module Config =
     let RepairAssistMaxCount = 2
     let SquadSize = 4
     let RallyPoint = {X = 15; Y = 15}
+    let PotentialFieldTileSize = 5
+    let PotentialFieldSize = Map_Size / PotentialFieldTileSize
+    let ThreatCheckInfluenceSpread = 4
+    let ThreatCheckInfluenceDiminutionRate = 4
