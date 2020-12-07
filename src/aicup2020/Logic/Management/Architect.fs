@@ -4,9 +4,10 @@ open Aicup2020.Model
 open Jaina.Core
 open Jaina.Logic.Tactics
 open Jaina.Algo
+open Jaina.State
 
 
-type Architect(playerView: PlayerView, gameState:GameState, order:(EntityType*int)list) =
+type Architect(playerView: PlayerView, turnState:TurnState, order:(EntityType*int)list) =
     inherit Manager(playerView)
     
     let mapSize = playerView.MapSize
@@ -35,7 +36,7 @@ type Architect(playerView: PlayerView, gameState:GameState, order:(EntityType*in
        }
         
     override this.Execute() =
-        let tiles = gameState.BuildableTiles
+        let tiles = turnState.BuildableTiles
 
         let chooseBuilding entityType =
             let size = (this.EntityTypeProps entityType).Size

@@ -58,11 +58,17 @@ type HeatAttack() =
                                      | EntityType.BuilderBase -> Some((x.Position, 10u))
                                      | EntityType.MeleeBase -> Some((x.Position, 5u))
                                      | EntityType.House -> Some((x.Position, 0u))
+                                     | EntityType.BuilderUnit -> Some((x.Position, 200u))
                                      | EntityType.Turret -> Some((x.Position, 250u))
                                      | _ -> None
 
-        let targets = playerView.Entities |> Seq.filter(fun x -> x.PlayerId <> Some(playerView.MyId))
-                                          |> Seq.choose enemySelector
+        let enemyTargets = playerView.Entities |> Seq.filter(fun x -> x.PlayerId <> Some(playerView.MyId))
+                                               |> Seq.choose enemySelector
+        
+        let targets = match enemyTargets |> Seq.exists(fun _ -> true) with
+                        | true -> enemyTargets
+                        | _ -> Config.Global_Attack_Targets |> Seq.map(fun x -> (x, 0u))
+        
         let fieldWeightFunc (_, next) = match walkMap.TryFind next with
                                                 | Some q -> q
                                                 | _ -> 1u

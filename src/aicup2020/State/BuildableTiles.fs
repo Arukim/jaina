@@ -1,7 +1,8 @@
-﻿namespace Jaina.Core
+﻿namespace Jaina.State
 
 open Aicup2020.Model
 open Jaina.Algo
+open Jaina.Core
 
 type TileBuildState =
     | Empty = 0

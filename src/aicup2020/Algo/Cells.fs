@@ -6,6 +6,9 @@ module Cells =
     let dist a b =
         abs(a.X - b.X) + abs(a.Y - b.Y)
 
+    let sum a b =
+        {X = a.X + b.X; Y = a.Y + b.Y}
+
     // use in calculation of shortest path to a building
     let triPointDist a1 a2 b =
         if b < a1 then a1 - b

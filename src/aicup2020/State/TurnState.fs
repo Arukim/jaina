@@ -1,9 +1,10 @@
-﻿namespace Jaina.Core
+﻿namespace Jaina.State
 
 open Aicup2020.Model
 open Jaina.Algo
+open Jaina.Core
 
-type GameState(playerView: PlayerView) = 
+type TurnState(playerView: PlayerView) = 
     
     let builders = playerView |> View.countOwnUnits  EntityType.BuilderUnit
     let melees = playerView |> View.countOwnUnits  EntityType.MeleeUnit
@@ -27,9 +28,9 @@ type GameState(playerView: PlayerView) =
     let mutable resources = me.Resource
 
     let factories = Map.empty
-                       .Add(EntityType.BuilderUnit, {Current = builders; Capacity = builderBases; Enlisted = 0})
-                       .Add(EntityType.RangedUnit, {Current = rangeds; Capacity = rangedBases; Enlisted = 0})
-                       .Add(EntityType.MeleeUnit, {Current = melees; Capacity = meleeBases; Enlisted = 0})
+                       .Add(EntityType.BuilderUnit, new UnitFactory(builders, builderBases))
+                       .Add(EntityType.RangedUnit, new UnitFactory(rangeds, rangedBases))
+                       .Add(EntityType.MeleeUnit, new UnitFactory(melees, meleeBases))
 
     let buildableTiles = BuildableTiles.construct playerView       
 

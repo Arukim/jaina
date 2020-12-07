@@ -19,6 +19,7 @@ type MyStrategy() =
 
         let currMilitary = (playerView |> View.countOwnUnits EntityType.RangedUnit) + 
                            (playerView |> View.countOwnUnits EntityType.MeleeUnit)
+      
         let heatMapUpdateTick = playerView.CurrentTick % Config.Attack_Map_Refresh_Rate = 0
         if currMilitary > 0 && heatMapUpdateTick then 
             HeatAttack.Update(playerView)

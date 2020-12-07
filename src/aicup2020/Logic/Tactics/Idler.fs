@@ -1,7 +1,6 @@
 ﻿namespace Jaina.Logic.Tactics
 
 open Aicup2020.Model
-open Jaina.Collections
 
 type Idler(playerView: PlayerView) =
     inherit Tactics(playerView)

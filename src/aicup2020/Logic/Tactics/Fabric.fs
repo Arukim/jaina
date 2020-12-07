@@ -4,8 +4,9 @@ open Aicup2020.Model
 open Jaina.Collections
 open Jaina.Algo
 open Jaina.Core
+open Jaina.State
 
-type Fabric(playerView: PlayerView, gameState: GameState, unitType: EntityType, count) =
+type Fabric(playerView: PlayerView, turnState: TurnState, unitType: EntityType, count) =
     inherit Tactics(playerView)
 
     override this.Execute entities = 
@@ -22,7 +23,7 @@ type Fabric(playerView: PlayerView, gameState: GameState, unitType: EntityType, 
             match entity.EntityType with
                 | EntityType.BuilderBase -> 
                     let bestNeighbour = Cells.outerBorders (mapSize / 5) 1 {X = entity.Position.X / 5; Y = entity.Position.Y / 5}
-                                            |> Seq.choose(fun x -> match gameState.ResourcesField.TryFind(x) with
+                                            |> Seq.choose(fun x -> match turnState.ResourcesField.TryFind(x) with
                                                                         | Some v -> Some(x,v)
                                                                         | _ -> None)
                                             |> Seq.sortByDescending(fun (_, v) -> v)
