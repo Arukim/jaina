@@ -4,7 +4,7 @@ open Aicup2020.Model
 open Jaina.Logic.Tactics
 
 
-type Recruiter(playerView: PlayerView, recruits) =
+type TrainingGeneral(playerView: PlayerView, recruits) =
     inherit Manager(playerView)
 
     override this.Execute() =

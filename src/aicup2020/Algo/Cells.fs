@@ -12,6 +12,15 @@ module Cells =
     let toVec size pos =
         {X = pos % size; Y = pos / size}
 
+    let fromVec size pos =
+        pos.Y * size + pos.X
+
+    let toTilePos size pos = 
+        {X = pos.X / size; Y = pos.Y / size}
+
+    let upcastPos size pos =
+        {X = pos.X * size + size / 2; Y = pos.Y * size + size / 2}
+
     // use in calculation of shortest path to a building
     let triPointDist a1 a2 b =
         if b < a1 then a1 - b

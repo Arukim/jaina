@@ -22,3 +22,4 @@ module Config =
     let PotentialFieldSize = Map_Size / PotentialFieldTileSize
     let ThreatCheckInfluenceSpread = 4
     let ThreatCheckInfluenceDiminutionRate = 4
+    let CommanderThreatWatermark = 0

@@ -5,6 +5,7 @@ open Jaina.Logic
 open Jaina.Logic.Tactics
 open Jaina.Core
 open Jaina.Logic.Strategy
+open Jaina.State
 
 type MyStrategy() =
 
@@ -23,10 +24,12 @@ type MyStrategy() =
         let heatMapUpdateTick = playerView.CurrentTick % Config.Attack_Map_Refresh_Rate = 0
         if currMilitary > 0 && heatMapUpdateTick then 
             HeatAttack.Update(playerView)
-        
-        let strategy = new DefaultStrategy(playerView)
+            
+        let turnState = new TurnState(playerView)
 
-        let turnTactics = strategy.Execute() @ [new Idler(playerView)]        
+        let commander = new Commander(playerView, turnState)
+
+        let turnTactics = commander.Execute()      
         
         let myEntities = playerView |> View.ownEntities
                                     |> View.filterActionable

@@ -1,15 +1,15 @@
-﻿namespace Jaina.Logic 
+﻿namespace Jaina.State 
 
-open Jaina.State
 open Jaina.Core
 open Jaina.Algo
+open Aicup2020.Model
 
 module ThreatCheck = 
-    let buildInfluenceThreat (turnState:TurnState) =
+    let buildInfluenceThreat (ownTerritoryField: Map<Vec2Int, int>) (foeUnitsField: Map<Vec2Int, int>) =
         let size = Config.PotentialFieldSize
         let influenceMap = 0 |> Seq.unfold(fun num ->
                             let pos = Cells.toVec size num
-                            let item = turnState.OwnTerritoryField.TryFind pos
+                            let item = ownTerritoryField.TryFind pos
                             match item with
                                 | Some x -> Some(x, num + 1)
                                 | _ -> None)
@@ -31,7 +31,7 @@ module ThreatCheck =
                 (pos, value))
             |> Array.filter(fun (_, value) -> value > 0)
             |> Array.map(fun (pos, value) -> 
-                let threat = turnState.FoeUnitsField.[pos]
+                let threat = foeUnitsField.[pos]
                 (pos, value, threat))
             |> List.ofSeq
 

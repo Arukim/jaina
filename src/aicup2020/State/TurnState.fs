@@ -35,14 +35,6 @@ type TurnState(playerView: PlayerView) =
                             | _ -> None)
                     |> Map.ofSeq
 
-
-                     
-    let totalUnits = builders + melees + rangeds
-    let maxUnits = playerView |> View.ownEntities
-                              |> View.filterHousing
-                              |> Seq.map(fun x -> playerView.EntityProperties.[x.EntityType].PopulationProvide)
-                              |> Seq.sum
-
     let me = playerView.Players |> Array.find(fun x -> x.Id = playerView.MyId)
     let mutable resources = me.Resource
 
@@ -61,6 +53,7 @@ type TurnState(playerView: PlayerView) =
     let resourcesField = PotentialField.create(playerView.MapSize, Config.PotentialFieldTileSize, minerals |> translate)
     let foeUnitsField = PotentialField.create(playerView.MapSize,  Config.PotentialFieldTileSize, foeUnits |> translate)
     let ownTerritoryField = PotentialField.create(playerView.MapSize,  Config.PotentialFieldTileSize, ownTerritory |> translate)
+    let influenceAndThreat = ThreatCheck.buildInfluenceThreat ownTerritoryField foeUnitsField
 
 
     member _.Resources
@@ -75,6 +68,7 @@ type TurnState(playerView: PlayerView) =
     member _.ResourcesField with get() = resourcesField
     member _.FoeUnitsField with get() = foeUnitsField
     member _.OwnTerritoryField with get() = ownTerritoryField
+    member _.InfluenceAndThreat with get() = influenceAndThreat
 
     member this.PlanBuild entityType =
         resources <- this.Resources - this.GetPrice entityType
