@@ -3,6 +3,8 @@
 open Aicup2020.Model
 
 module Config =
+    let InfluenceIterations = 5
+    let TypicalAttack = 5
     let Resource_Tile_Walk_Price = 7u
     let CombatUnit_Tile_Walk_Price = 1u
     let BuilderUnit_Tile_Walk_Price = 5u

@@ -88,3 +88,23 @@ type TurnState(playerView: PlayerView) =
             match View.isUnit entityType with
                 | true -> (factories.[entityType]).HasCapacity
                 | _ -> true
+
+    member this.BuildMoveCost with get() =
+        let size = playerView.MapSize
+        let moveCost = Array2D.create size size 1u
+
+        
+        let fillBuildings building = 
+            let pos = building.Position
+            let buildingSize = playerView.EntityProperties.[building.EntityType].Size
+
+            for x in pos.X .. pos.X + buildingSize - 1 do
+                for y in pos.Y .. pos.Y + buildingSize - 1 do
+                    moveCost.[x,y] <- System.UInt32.MaxValue / 2u
+
+        minerals |> Map.iter(fun pos v -> moveCost.[pos.X, pos.Y] <- uint (v / Config.TypicalAttack) + 1u)
+
+        playerView.Entities |> View.filterBuildings
+                            |> Seq.iter fillBuildings
+
+        moveCost

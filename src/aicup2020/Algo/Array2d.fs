@@ -11,6 +11,7 @@ module Array2d =
             if y < size - 1 then yield pos + size
         }
 
+
     let neighboursPlusOf size pos =
         seq {
             let (x,y) = pos % size, pos / size

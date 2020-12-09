@@ -14,48 +14,59 @@ type Militia(playerView: PlayerView, turnState: TurnState) =
         let militia = entities |> View.filterMilitaryUnits
                                |> List.ofSeq
 
-        let castPos pos = Cells.upcastPos Config.PotentialFieldTileSize pos
 
-        let mutable defenseMap = turnState.InfluenceAndThreat 
-                                |> List.map(fun (pos, _, threat) -> (castPos pos, threat))
-                                |> Map.ofList
+        let ownXs = turnState.OwnTerritoryField |> Seq.filter(fun x -> x.Value > 0)
+                                                |> Seq.map(fun x -> x.Key.X)
+                                                |> Seq.sort
+                                                |> List.ofSeq
+        let ownYs = turnState.OwnTerritoryField |> Seq.filter(fun x -> x.Value > 0)
+                                                |> Seq.map(fun x -> x.Key.Y)
+                                                |> Seq.sort
+                                                |> List.ofSeq
 
-        let militiaSort unit pos value =
-            ((Cells.dist pos unit.Position) /  Config.PotentialFieldTileSize, -value)
+        let ownMin = {
+            X = ownXs |> List.head
+            Y = ownYs |> List.head
+        }
 
-        let actions = militia |> List.map(fun unit ->
-                // dynamic programming!
-                let keyValue = defenseMap |> Seq.sortBy(fun t -> militiaSort unit t.Key t.Value)                            
-                                          |> Seq.head
+        let ownMax = {
+            X = ((ownXs |> List.last) + 1) * Config.PotentialFieldTileSize
+            Y = ((ownYs |> List.last) + 1) * Config.PotentialFieldTileSize
+        }
 
+        let foeIsInMinMax entity =
+            let pos = entity.Position
+            pos.X >= ownMin.X && pos.X <= ownMax.X &&
+            pos.Y >= ownMin.Y && pos.Y <= ownMax.Y
 
-                let moveAction = Some({
-                    Target = keyValue.Key
-                    FindClosestPosition = true
-                    BreakThrough = true
-                })
+        let foes = playerView
+                        |> View.foeEntities
+                        |> View.filterMilitaryUnits
+                        |> Seq.filter foeIsInMinMax
+                        |> List.ofSeq
 
-                let attackAction = Some({
-                    Target = None 
-                    AutoAttack = Some({
-                        PathfindRange = (this.EntityProps unit).SightRange
-                        ValidTargets = match unit.EntityType with | _ -> [||]})
-                })
+        let moveCost = turnState.BuildMoveCost
 
-                let decreaseValue v =
-                    match v with 
-                        | Some x -> Some(x - unit.Health)
-                        | _ -> None
+        foes |> List.iter(fun foe ->
+                            let pathMap = Pathfinder.pathMap moveCost Config.InfluenceIterations foe.Position
+                            let range = match (this.EntityProps foe).Attack with
+                                                | Some x -> x.AttackRange
+                                                | None _ -> 0
 
-                defenseMap <- defenseMap.Change(keyValue.Key, decreaseValue)
+                            let extPathMap = pathMap |> Pathfinder.extendPathMap range
+                            let rank = float (extPathMap.Range + 1)
+                            let threatMap = extPathMap.ToNormalized (fun x -> 
+                                                                        let f = float x
+                                                                        (f / rank)*(rank - f) / rank)
 
-                (unit.Id, {
-                    MoveAction = moveAction
-                    BuildAction = None
-                    AttackAction = attackAction
-                    RepairAction = None
-                })
-            )
+                            ()
+                            )
+        
+        let foeInfluence = new InfluenceMap(playerView.MapSize)
+
+        //foesProxMap |> List.iter(fun (foe, map) -> foeInfluence.AddLayer())
+
+        let actions = []
                           
         let others = this.FilterInactive entities actions
         (others, actions)

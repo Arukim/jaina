@@ -21,6 +21,15 @@ module Cells =
     let upcastPos size pos =
         {X = pos.X * size + size / 2; Y = pos.Y * size + size / 2}
 
+    let patchSize min max =
+        {X = max.X - min.X + 1; Y = max.Y - min.Y + 1}
+
+    let patchEdges size start range =
+        let calcMinMax x = (max 0 x - range), (min (x + range) (size - 1))
+        let (xMin, xMax) = calcMinMax start.X
+        let (yMin, yMax) = calcMinMax start.Y
+        ({X = xMin; Y = yMin}, {X = xMax; Y = yMax})
+
     // use in calculation of shortest path to a building
     let triPointDist a1 a2 b =
         if b < a1 then a1 - b
@@ -53,4 +62,12 @@ module Cells =
             if curr.X < mapSize-1 then yield {X = curr.X + 1; Y = curr.Y}
             if curr.Y > 0 then yield {X = curr.X; Y = curr.Y - 1}
             if curr.Y < mapSize-1 then yield {X = curr.X; Y = curr.Y + 1}
+        }
+
+    let neighboursOf2 mapSize curr = 
+        seq {
+            if curr.X > 0 then yield {X = curr.X - 1; Y = curr.Y}
+            if curr.X < mapSize.X-1 then yield {X = curr.X + 1; Y = curr.Y}
+            if curr.Y > 0 then yield {X = curr.X; Y = curr.Y - 1}
+            if curr.Y < mapSize.Y-1 then yield {X = curr.X; Y = curr.Y + 1}
         }

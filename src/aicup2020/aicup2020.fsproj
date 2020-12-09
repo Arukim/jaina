@@ -41,9 +41,10 @@
         <Compile Include="Core\View.fs" />
         <Compile Include="Algo\Array2d.fs" />
         <Compile Include="Algo\Cells.fs" />
+        <Compile Include="Algo\InfluenceMap.fs" />
+        <Compile Include="Algo\InfluencePatch.fs" />
         <Compile Include="Algo\Pathfinder.fs" />
         <Compile Include="Algo\PotentialField.fs" />
-        <Compile Include="Algo\InfluenceMap.fs" />
         <Compile Include="State\ThreatCheck.fs" />
         <Compile Include="State\BuildableTiles.fs" />
         <Compile Include="State\UnitFactory.fs" />
