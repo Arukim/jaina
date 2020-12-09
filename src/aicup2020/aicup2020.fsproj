@@ -35,6 +35,10 @@
         <Compile Include="Model/DebugState.fs" />
         <Compile Include="Collections\Seq.fs" />
         <Compile Include="Collections\PriorityQ.fs" />
+        <Compile Include="Core\Palette.fs" />
+        <Compile Include="Core\Vec2SingleExt.fs" />
+        <Compile Include="Core\ColorSingleExt.fs" />
+        <Compile Include="Core\Debugger.fs" />
         <Compile Include="Core\Config.fs" />
         <Compile Include="Core\PerfMeter.fs" />
         <Compile Include="Core\Diag.fs" />

@@ -17,6 +17,7 @@ type MyStrategy() =
             | _ -> acc
 
     member this.getAction(playerView: PlayerView, debugInterface: Option<DebugInterface>): Action =
+        Debug.Instance.Refresh()
 
         let currMilitary = (playerView |> View.countOwnUnits EntityType.RangedUnit) + 
                            (playerView |> View.countOwnUnits EntityType.MeleeUnit)
@@ -35,10 +36,23 @@ type MyStrategy() =
                                     |> View.filterActionable
                                     |> List.ofSeq
 
-        let actions = doTurn myEntities turnTactics [] |> Map.ofList            
+        Debug.Instance.FillCellA Palette.Crimson 0.5f {X=0;Y=0}
+        let actions = doTurn myEntities turnTactics [] |> Map.ofList
+
+        match debugInterface with
+            | Some x -> Debug.Instance.Events |> List.iter x.send
+            | _ -> ()
 
         { EntityActions = actions}
 
     member this.debugUpdate(playerView: PlayerView, debugInterface: DebugInterface) =
         debugInterface.send (DebugCommand.Clear(new DebugCommandClear()))
+        #if DEBUG
+        let state = debugInterface.getState()
+
+        //Debug.Instance.Events |> List.iter debugInterface.send
+
+        ()
+        #else
         debugInterface.getState () |> ignore
+        #endif

@@ -57,8 +57,11 @@ type Militia(playerView: PlayerView, turnState: TurnState) =
                             let rank = float (extPathMap.Range + 1)
                             let threatMap = extPathMap.ToNormalized (fun x -> 
                                                                         let f = float x
-                                                                        (f / rank)*(rank - f) / rank)
+                                                                        (rank - f) / (rank - 1.0))
 
+                            threatMap.Map |> Array2D.iteri(fun x y v-> 
+                                                            let pos = threatMap.ToGlobalCoord {X=x;Y=y}
+                                                            Debug.Instance.FillCellA Palette.DarkRed (single v * 0.2f) pos)
                             ()
                             )
         

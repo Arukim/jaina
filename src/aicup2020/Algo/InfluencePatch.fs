@@ -39,6 +39,9 @@ type InfluencePatch<'T> = {
     member this.ToPatchCoord pos =
         {X = pos.X - this.Min.X; Y = pos.Y- this.Min.Y}
 
+    member this.ToGlobalCoord pos =
+        {X = pos.X + this.Min.X; Y = pos.Y + this.Min.Y}
+
     member this.GetExpanded range initValue =
         let newRange = this.Range + range
         let (min, max) = Cells.patchEdges this.BaseSize this.Start newRange
