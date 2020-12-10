@@ -13,6 +13,5 @@ module Military =
     let Defensive = [
         EntityType.RangedUnit;
         EntityType.RangedUnit;
-        EntityType.MeleeUnit;
     ]
 

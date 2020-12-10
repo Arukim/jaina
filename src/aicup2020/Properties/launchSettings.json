@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "aicup2020": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "JAINA_ENV": "1"
+      }
+    }
+  }
+}

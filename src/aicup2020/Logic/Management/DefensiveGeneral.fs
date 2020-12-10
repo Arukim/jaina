@@ -3,7 +3,6 @@
 open Aicup2020.Model
 open Jaina.Logic.Tactics
 
-
 type DefensiveGeneral(playerView: PlayerView, turnState) =
     inherit Manager(playerView)
 

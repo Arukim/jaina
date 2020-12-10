@@ -30,16 +30,18 @@ module Pathfinder =
                     )
         costSoFar
 
-
-    let pathMap (moveCost: uint[,]) range start  =
+    let pathMapEx (moveCost: uint[,]) range start startSize =
         let baseSize = moveCost.GetLength(0)
-        let patch = InfluencePatch<uint>.Create baseSize start range 0u
+        let patch = InfluencePatch<uint>.Create baseSize start startSize range 0u
         let resMap = patch.Map
 
         let frontier = new Queue<uint*Vec2Int>()
-        frontier.Enqueue(1u, start)
-        let trStart = patch.ToPatchCoord start
-        resMap.[trStart.X, trStart.Y] <- 1u
+        for x in 0..startSize - 1 do
+            for y in 0..startSize - 1 do
+                let p = {X=start.X + x; Y=start.Y + y}
+                frontier.Enqueue(1u, p)
+                let trStart = patch.ToPatchCoord p
+                resMap.[trStart.X, trStart.Y] <- 1u
 
         while frontier.Any() do
             let queuedCost, curr = frontier.Dequeue()
@@ -52,24 +54,40 @@ module Pathfinder =
                        resMap.[trNext.X, trNext.Y] = 0u then
                             resMap.[trNext.X, trNext.Y] <- newCost
                             frontier.Enqueue(newCost, next))
+        patch    
+    
+    let pathMap (moveCost: uint[,]) range start = 
+        pathMapEx moveCost range start 1
+
+    let createPatch baseSize start startSize =
+        let patch = InfluencePatch<uint>.Create baseSize start startSize 0 0u
+        let resMap = patch.Map
+        for x in 0..startSize - 1 do
+            for y in 0..startSize - 1 do
+                  let point = {X=start.X + x; Y=start.Y + y}
+                  let patchPoint = patch.ToPatchCoord point          
+                  resMap.[patchPoint.X, patchPoint.Y] <- 1u
         patch
 
     let extendPathMap range (pathMap: InfluencePatch<uint>) =
         let patch = pathMap.GetExpanded range 0u
         let mapSize = {X = patch.Map.GetLength(0); Y = patch.Map.GetLength(1)}
 
-        let threat = uint pathMap.Range
+        let threat = uint pathMap.Range + 1u
+        let limit = threat + uint range
         
-        let frontier = new Queue<Vec2Int>()
+        let frontier = new Queue<Vec2Int*uint>()
         pathMap.Map |> Array2D.iteri(fun x y v ->
                             match v with
-                                | threat -> frontier.Enqueue {X=x; Y=y}
+                                | threat -> frontier.Enqueue (patch.ToPatchCoord(pathMap.ToGlobalCoord {X=x; Y=y}), threat)
                                 | _ -> ())
 
         while frontier.Any() do
-            frontier.Dequeue() |> Cells.neighboursOf2 mapSize
-                               |> Seq.iter(fun n ->
-                                if patch.Map.[n.X, n.Y] = 0u then
-                                    patch.Map.[n.X, n.Y] <- threat + 1u
-                                    frontier.Enqueue n)
+            let (pos, t) = frontier.Dequeue()
+            if t < limit then
+                pos |> Cells.neighboursOf2 mapSize
+                    |> Seq.iter(fun n ->
+                        if patch.Map.[n.X, n.Y] = 0u then
+                            patch.Map.[n.X, n.Y] <- t + 1u
+                            frontier.Enqueue (n, t + 1u))
         patch

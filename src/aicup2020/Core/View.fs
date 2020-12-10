@@ -11,7 +11,7 @@ module View =
     let ownEntities view =
         view.Entities |> Seq.filter(fun x -> x.PlayerId = Some(view.MyId))
 
-    let ownEntitiesOf view entityType =
+    let ownEntitiesOf entityType view  =
         view.Entities |> Seq.filter(fun x -> x.PlayerId = Some(view.MyId))
                       |> Seq.filter(fun x -> x.EntityType = entityType)
 

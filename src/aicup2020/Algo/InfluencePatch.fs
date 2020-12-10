@@ -6,22 +6,26 @@ type InfluencePatch<'T> = {
     Min: Vec2Int
     Max: Vec2Int
     Start: Vec2Int
+    StartSize: int
     BaseSize: int
     Range: int
     Map: 'T[,]
 } with
-    static member Create baseSize start range initValue =        
-        let (min, max) = Cells.patchEdges baseSize start range
+    static member Create baseSize start startSize range initValue =        
+        let (min, max) = Cells.patchEdges baseSize start startSize range
         let patchSize = Cells.patchSize min max 
         let resMap = Array2D.create patchSize.X patchSize.Y initValue
         {
             Min = min
             Max = max
             Start = start
+            StartSize = startSize
             BaseSize = baseSize
             Range = range
             Map = resMap
         }
+    
+    member this.Rank with get() = this.Range + 1
 
     member this.ToNormalized mapping =
         let patchSize = Cells.patchSize this.Min this.Max
@@ -31,20 +35,21 @@ type InfluencePatch<'T> = {
             Min = this.Min
             Max = this.Max
             Start = this.Start
+            StartSize = this.StartSize
             BaseSize = this.BaseSize
             Range = this.Range
             Map = resMap
         }
 
     member this.ToPatchCoord pos =
-        {X = pos.X - this.Min.X; Y = pos.Y- this.Min.Y}
+        {X = pos.X - this.Min.X; Y = pos.Y - this.Min.Y}
 
     member this.ToGlobalCoord pos =
         {X = pos.X + this.Min.X; Y = pos.Y + this.Min.Y}
 
     member this.GetExpanded range initValue =
         let newRange = this.Range + range
-        let (min, max) = Cells.patchEdges this.BaseSize this.Start newRange
+        let (min, max) = Cells.patchEdges this.BaseSize this.Start this.StartSize newRange
         let newSize = Cells.patchSize min max
         let newMap = Array2D.create newSize.X newSize.Y initValue
         Array2D.blit this.Map 0 0 newMap (this.Min.X - min.X) (this.Min.Y - min.Y) (this.Map.GetLength(0)) (this.Map.GetLength(1))
@@ -52,6 +57,7 @@ type InfluencePatch<'T> = {
             Min = min
             Max = max
             Start = this.Start
+            StartSize = this.StartSize
             BaseSize = this.BaseSize
             Range = newRange
             Map = newMap

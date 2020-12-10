@@ -5,7 +5,7 @@
         <TargetFramework>netcoreapp5.0</TargetFramework>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
-
+  
     <ItemGroup>
         <Compile Include="Model/Vec2Single.fs" />
         <Compile Include="Model/Color.fs" />
@@ -35,20 +35,24 @@
         <Compile Include="Model/DebugState.fs" />
         <Compile Include="Collections\Seq.fs" />
         <Compile Include="Collections\PriorityQ.fs" />
+        <Compile Include="Core\Config.fs" />
         <Compile Include="Core\Palette.fs" />
         <Compile Include="Core\Vec2SingleExt.fs" />
         <Compile Include="Core\ColorSingleExt.fs" />
-        <Compile Include="Core\Debugger.fs" />
-        <Compile Include="Core\Config.fs" />
         <Compile Include="Core\PerfMeter.fs" />
         <Compile Include="Core\Diag.fs" />
         <Compile Include="Core\View.fs" />
+        <Compile Include="Debug\IDebugger.fs" />
+        <Compile Include="Debug\NullDebugger.fs" />
+        <Compile Include="Debug\Debugger.fs" />
+        <Compile Include="Debug\Dashboard.fs" />
         <Compile Include="Algo\Array2d.fs" />
         <Compile Include="Algo\Cells.fs" />
-        <Compile Include="Algo\InfluenceMap.fs" />
         <Compile Include="Algo\InfluencePatch.fs" />
+        <Compile Include="Algo\InfluenceMap.fs" />
         <Compile Include="Algo\Pathfinder.fs" />
         <Compile Include="Algo\PotentialField.fs" />
+        <Compile Include="State\Fields\FieldsManager.fs" />
         <Compile Include="State\ThreatCheck.fs" />
         <Compile Include="State\BuildableTiles.fs" />
         <Compile Include="State\UnitFactory.fs" />

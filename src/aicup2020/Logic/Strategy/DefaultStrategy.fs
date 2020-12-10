@@ -12,7 +12,7 @@ type DefaultStrategy(playerView: PlayerView, turnState, squads, recruits) =
 
     let recruitPlan = Blueprints.Military.Default; 
 
-    override this.Execute() =
+    override this.Execute() =                             
         
         let currStage = stages |> this.CurrStage 
           

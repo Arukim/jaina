@@ -1,6 +1,7 @@
 ﻿namespace Jaina.State
 
 open Aicup2020.Model
+open Jaina.State.Fields
 open Jaina.Algo
 open Jaina.Core
 
@@ -12,6 +13,8 @@ type TurnState(playerView: PlayerView) =
     let builderBases = playerView |> View.countOwnUnits  EntityType.BuilderBase
     let meleeBases = playerView |> View.countOwnUnits  EntityType.MeleeBase
     let rangedBases = playerView |> View.countOwnUnits  EntityType.RangedBase
+
+    let fieldsManager = new FieldsManager(playerView)
 
     let minerals = playerView 
                     |> View.entitiesOf EntityType.Resource
@@ -69,6 +72,8 @@ type TurnState(playerView: PlayerView) =
     member _.FoeUnitsField with get() = foeUnitsField
     member _.OwnTerritoryField with get() = ownTerritoryField
     member _.InfluenceAndThreat with get() = influenceAndThreat
+
+    member _.FieldsManager with get() = fieldsManager
 
     member this.PlanBuild entityType =
         resources <- this.Resources - this.GetPrice entityType

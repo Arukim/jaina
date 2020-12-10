@@ -22,7 +22,7 @@ type DefensiveStrategy(playerView: PlayerView, turnState, squads: Squad list, re
             let tilePos = Cells.toTilePos Config.PotentialFieldTileSize x.Position
             let ownTile = turnState.OwnTerritoryField.TryFind tilePos
             match ownTile with 
-                | Some _ -> Some(x)
+                | None -> Some(x)
                 | _ -> None
 
         

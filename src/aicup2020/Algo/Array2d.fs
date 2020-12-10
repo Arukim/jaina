@@ -25,3 +25,6 @@ module Array2d =
             if x < size - 1 && y < size - 1 then yield pos + 1 + size
         }
 
+module Array2D =
+    let toSeq (a:'a[,]) : seq<'a> =
+        seq { for x in a do yield x :?> 'a }

@@ -6,6 +6,7 @@ open Jaina.Logic.Tactics
 open Jaina.Core
 open Jaina.Logic.Strategy
 open Jaina.State
+open Jaina.Debug
 
 type MyStrategy() =
 
@@ -17,7 +18,7 @@ type MyStrategy() =
             | _ -> acc
 
     member this.getAction(playerView: PlayerView, debugInterface: Option<DebugInterface>): Action =
-        Debug.Instance.Refresh()
+        Dashboard.Refresh()
 
         let currMilitary = (playerView |> View.countOwnUnits EntityType.RangedUnit) + 
                            (playerView |> View.countOwnUnits EntityType.MeleeUnit)
@@ -36,11 +37,13 @@ type MyStrategy() =
                                     |> View.filterActionable
                                     |> List.ofSeq
 
-        Debug.Instance.FillCellA Palette.Crimson 0.5f {X=0;Y=0}
         let actions = doTurn myEntities turnTactics [] |> Map.ofList
-
+        
         match debugInterface with
-            | Some x -> Debug.Instance.Events |> List.iter x.send
+            | Some x ->
+                x.send (DebugCommand.SetAutoFlush({Enable = false}))
+                Dashboard.Main.Events |> List.iter x.send
+                x.send (DebugCommand.Flush(new DebugCommandFlush()))
             | _ -> ()
 
         { EntityActions = actions}
@@ -49,8 +52,8 @@ type MyStrategy() =
         debugInterface.send (DebugCommand.Clear(new DebugCommandClear()))
         #if DEBUG
         let state = debugInterface.getState()
-
-        //Debug.Instance.Events |> List.iter debugInterface.send
+        //if state.PressedKeys.Length > 0 then
+        //    Dashboard.Main.Events |> List.iter debugInterface.send
 
         ()
         #else

@@ -24,8 +24,8 @@ module Cells =
     let patchSize min max =
         {X = max.X - min.X + 1; Y = max.Y - min.Y + 1}
 
-    let patchEdges size start range =
-        let calcMinMax x = (max 0 x - range), (min (x + range) (size - 1))
+    let patchEdges size start startSize range =
+        let calcMinMax x = (max 0 (x - range)), (min (x + range + startSize - 1) (size - 1))
         let (xMin, xMax) = calcMinMax start.X
         let (yMin, yMax) = calcMinMax start.Y
         ({X = xMin; Y = yMin}, {X = xMax; Y = yMax})

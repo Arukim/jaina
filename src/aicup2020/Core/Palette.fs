@@ -1,4 +1,4 @@
-﻿namespace Jaina.Core
+﻿namespace Jaina.Debug
 
 open System.Drawing
 

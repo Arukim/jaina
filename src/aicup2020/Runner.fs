@@ -20,6 +20,10 @@ module Runner =
             writer.Flush()
 
         member this.run =
+            if System.Environment.GetEnvironmentVariable("JAINA_ENV") <> null then 
+                let _ = System.Diagnostics.Process.Start("powershell", @"C:\runner\addBots.ps1")
+                ()
+
             printfn $"I see {System.Environment.ProcessorCount} advisors" 
             let myStrategy = new MyStrategy()
             let debugInterface = new DebugInterface(reader, writer)
